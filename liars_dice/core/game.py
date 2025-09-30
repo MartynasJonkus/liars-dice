@@ -69,6 +69,8 @@ class LiarsDiceGame:
 
     def legal_actions(self) -> List[Tuple[str, Any]]:
         actions: List[Tuple[str, Any]] = []
+        if self.num_alive() <= 1:
+            return actions
 
         total_dice = sum(self._dice_left)
         start_q = 1 if self._last_bid is None else self._last_bid[0]
@@ -114,7 +116,9 @@ class LiarsDiceGame:
         self._current = nxt
 
     def step(self, action: Tuple[str, Any]) -> Dict[str, Any]:
-        """Apply action for current player. Returns info dict with possible 'terminal' flag and 'winner'."""
+        if self.num_alive() <= 1:
+            return {"terminal": True, "winner": self._winner()}
+    
         kind, payload = action
         pid = self._current
 
@@ -130,24 +134,36 @@ class LiarsDiceGame:
             assert self._last_bid is not None, "Cannot call Liar! before any bid"
             self._history.append((pid, "liar", None))
 
-            # showdown
             q, f = self._last_bid
             actual = self._count_face(f)
             previous_bidder = self._previous_live_player(pid)
+            caller = pid
+
+            dice_snapshot = [list(d) for d in self._dice]
+
             loser = pid if actual >= q else previous_bidder
             self._dice_left[loser] = max(0, self._dice_left[loser] - 1)
+            
+            self._history.append((
+                "showdown",
+                "count",
+                {
+                    "bid": (q, f),
+                    "actual": actual,
+                    "loser": loser,
+                    "dice": dice_snapshot,
+                    "previous_bidder": previous_bidder,
+                    "caller": caller,
+                }
+            ))
 
-            # prepare next round
-            # If loser still has dice, they start; else next live player starts
-            if self.num_alive() > 1:
-                self._current = loser if self._dice_left[loser] > 0 else self._next_live_player(loser)
-                self._last_bid = None
-                self._history.append(("showdown", "count", {"bid": (q, f), "actual": actual, "loser": loser}))
-                self._roll_all()
-                
-            # terminal?
             if self.num_alive() == 1:
                 return {"terminal": True, "winner": self._winner()}
+            
+            
+            self._current = loser if self._dice_left[loser] > 0 else self._next_live_player(loser)
+            self._last_bid = None
+            self._roll_all()
             return {"terminal": False}
 
         else:
