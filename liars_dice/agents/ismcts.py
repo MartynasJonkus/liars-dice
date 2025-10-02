@@ -34,15 +34,25 @@ class Node:
     N: int = 0
 
 class ISMCTSAgent:
-    def __init__(self, label: str = "ISMCTS", sims_per_move: int = 2000,
-                 uct_c: float = math.sqrt(2), pw_alpha: float = 0.5, pw_c: float = 1.5,
-                 seed: Optional[int] = None):
+    def __init__(
+        self,
+        label: str = "ISMCTS",
+        sims_per_move: int = 2000,
+        uct_c: float = math.sqrt(2),
+        pw_alpha: float = 0.5,
+        pw_c: float = 1.5,
+        seed: Optional[int] = None,
+        prior_w_prob: float = 0.7,
+        prior_w_slack: float = 0.3
+    ):
         self.name = label
         self.sims_per_move = sims_per_move
         self.uct_c = uct_c
         self.pw_alpha = pw_alpha
         self.pw_c = pw_c
         self.rng = random.Random(seed)
+        self.prior_w_prob = prior_w_prob
+        self.prior_w_slack = prior_w_slack
 
     def select_action(self, game: LiarsDiceGame, obs: Observation) -> Action:
         root_player = obs.private.my_player
@@ -61,25 +71,40 @@ class ISMCTSAgent:
             while True:
                 limit = int(max(1, self.pw_c * (node.N ** self.pw_alpha)))
                 if len(node.children) < limit and node.untried:
-                    a = node.untried.pop(0)
-                    g_det.step(a)
-                    child_obs = g_det.observe(g_det._current)
-                    child_key = self._node_key_from_obs(child_obs)
-                    child_untried = self._ordered_actions_by_plausibility(
-                        child_obs, sum(child_obs.public.dice_left), child_obs.public.last_bid
-                    )
-                    child = Node(key=child_key, player=child_obs.public.current_player, untried=child_untried)
-                    node.children[a] = child
-                    node.edges.setdefault(a, EdgeStats())
-                    path.append((node, a))
-                    node = child
-                    break
-                if not node.children:
-                    break
+                    # Ensure the action we expand is legal in THIS determinization
+                    legal_now = set(g_det.legal_actions())
+                    while node.untried and node.untried[0] not in legal_now:
+                        # Drop actions that are not legal here (e.g., "liar" with no last_bid)
+                        node.untried.pop(0)
+
+                    if node.untried:
+                        a = node.untried.pop(0)
+                        g_det.step(a)
+                        child_obs = g_det.observe(g_det._current)
+                        child_key = self._node_key_from_obs(child_obs)
+                        child_untried = self._ordered_actions_by_plausibility(
+                            child_obs, sum(child_obs.public.dice_left), child_obs.public.last_bid
+                        )
+                        child = Node(key=child_key, player=child_obs.public.current_player, untried=child_untried)
+                        node.children[a] = child
+                        node.edges.setdefault(a, EdgeStats())
+                        path.append((node, a))
+                        node = child
+                        break
+                    else:
+                        # Nothing legal to expand at this node in this determinization -> rollout
+                        break
+
                 a = self._select_uct(node)
+                legal_now = set(g_det.legal_actions())
+                if a not in legal_now:
+                    # In this determinization, that child isn't legal (e.g., terminal or no last_bid for "liar")
+                    # Roll out from here instead of forcing an illegal step.
+                    break
                 path.append((node, a))
                 g_det.step(a)
                 node = node.children[a]
+
 
             # 3) Rollout
             reward = self._rollout_to_terminal(g_det, root_player)
@@ -103,8 +128,16 @@ class ISMCTSAgent:
     def _ordered_actions_by_plausibility(self, obs: Observation, total_dice: int,
                                          last_bid: Optional[Bid]) -> List[Action]:
         bids: List[Bid] = enumerate_legal_bids(total_dice, last_bid)
-        scored = [ (self._bid_truth_prob(obs, b), b) for b in bids ]
+
+        feasible: List[Bid] = [b for b in bids if not self._is_impossible_bid(obs, b)]
+
+        scored: List[Tuple[float, Bid]] = []
+        for b in feasible:
+            prior, _, _, _ = self._bid_prior(obs, b)
+            scored.append((prior, b))
+
         scored.sort(key=lambda x: (-x[0], x[1][0], x[1][1]))
+
         actions: List[Action] = [("bid", b) for _, b in scored]
         if last_bid is not None:
             actions.append(("liar", None))
@@ -137,35 +170,100 @@ class ISMCTSAgent:
                 best_val, best = u, a
         return best
 
+    # def _rollout_to_terminal(self, g: LiarsDiceGame, root_player: int) -> float:
+    #     while True:
+    #         if g.num_alive() <= 1:
+    #             winner = g._winner()
+    #             return 1.0 if winner == root_player else 0.0
+            
+    #         pid = g._current
+    #         obs = g.observe(pid)
+    #         legal = g.legal_actions()
+
+    #         if not legal:
+    #             winner = g._winner()
+    #             return 1.0 if winner == root_player else 0.0
+            
+    #         last = obs.public.last_bid
+    #         if last is not None:
+    #             if self._bid_truth_prob(obs, last) < 0.25:
+    #                 a = ("liar", None)
+    #                 if a not in legal:
+    #                     a = self.rng.choice(legal)
+    #             else:
+    #                 bids = enumerate_legal_bids(sum(obs.public.dice_left), last)
+    #                 picked = None
+    #                 for b in bids:
+    #                     if self._is_impossible_bid(obs, b):
+    #                         continue
+    #                     if ("bid", b) in legal and self._bid_truth_prob(obs, b) >= 0.5:
+    #                         picked = ("bid", b)
+    #                         break
+    #                 a = picked if picked else self.rng.choice(legal)
+    #         else:
+    #             my = obs.private.my_dice
+    #             best_face = max(range(2, 7), key=lambda f: count_my_matches(my, f))
+    #             n_unknown = sum(obs.public.dice_left) - len(my)
+    #             exp = n_unknown * success_prob_per_die(best_face)
+    #             q = max(1, min(sum(obs.public.dice_left),
+    #                     int(count_my_matches(my, best_face) + max(0.0, exp - 0.5))))
+    #             a = ("bid", (q, best_face))
+    #             if a not in legal:
+    #                 a = self.rng.choice(legal)
+
+    #         info = g.step(a)
+    #         if info.get("terminal"):
+    #             return 1.0 if info["winner"] == root_player else 0.0
     def _rollout_to_terminal(self, g: LiarsDiceGame, root_player: int) -> float:
+        R = 0.0
+        last_actor = None
+        last_action = None  # e.g., ("bid",(q,f)) or ("liar",None)
+
+        # Shaping constants (feel free to tune / scale)
+        WIN_GAME = 50.0
+        LOSE_GAME = -50.0
+        BID_NOT_CALLED = 1.0
+        BLUFF_CALLED_AND_LOST = -5.0
+        CALL_INCORRECT = -10.0
+        CALL_CORRECT = 5.0
+
         while True:
+            # Terminal guard
             if g.num_alive() <= 1:
                 winner = g._winner()
-                return 1.0 if winner == root_player else 0.0
-            
+                R += (WIN_GAME if winner == root_player else LOSE_GAME)
+                return R
+
             pid = g._current
             obs = g.observe(pid)
             legal = g.legal_actions()
-
             if not legal:
                 winner = g._winner()
-                return 1.0 if winner == root_player else 0.0
-            
+                R += (WIN_GAME if winner == root_player else LOSE_GAME)
+                return R
+
+            # --- Choose rollout action (your existing policy) ---
             last = obs.public.last_bid
             if last is not None:
-                if self._bid_truth_prob(obs, last) < 0.25:
+                # thresholds (slightly conservative works well with shaping)
+                call_thresh = 0.25
+                raise_thresh = 0.60
+
+                # pick action
+                if self._bid_truth_prob(obs, last) < call_thresh and ("liar", None) in legal:
                     a = ("liar", None)
-                    if a not in legal:
-                        a = self.rng.choice(legal)
                 else:
                     bids = enumerate_legal_bids(sum(obs.public.dice_left), last)
                     picked = None
                     for b in bids:
-                        if ("bid", b) in legal and self._bid_truth_prob(obs, b) >= 0.5:
+                        if self._is_impossible_bid(obs, b):
+                            continue
+                        if ("bid", b) in legal and self._bid_truth_prob(obs, b) >= raise_thresh:
                             picked = ("bid", b)
                             break
                     a = picked if picked else self.rng.choice(legal)
             else:
+                # opening
                 my = obs.private.my_dice
                 best_face = max(range(2, 7), key=lambda f: count_my_matches(my, f))
                 n_unknown = sum(obs.public.dice_left) - len(my)
@@ -176,9 +274,41 @@ class ISMCTSAgent:
                 if a not in legal:
                     a = self.rng.choice(legal)
 
+            # --- PAYOUT: "bid not called" (root bid, next player raised) ---
+            if last_actor == root_player and last_action and last_action[0] == "bid" and a[0] == "bid":
+                R += BID_NOT_CALLED
+
+            # Step environment
+            last_actor = pid
+            last_action = a
             info = g.step(a)
+
+            # --- PAYOUT: showdown outcomes when someone calls Liar! ---
+            if a[0] == "liar":
+                # showdown entry is last history item
+                h = g._history[-1] if g._history else None
+                payload = h[2] if isinstance(h, tuple) and len(h) >= 3 and isinstance(h[2], dict) else {}
+                loser = payload.get("loser", None)
+                # previous bidder is the "challenger" in your payload; adjust name if needed
+                prev_bidder = payload.get("challenger") or payload.get("previous_bidder")
+
+                # Root called liar?
+                if pid == root_player:
+                    if loser == root_player:
+                        R += CALL_INCORRECT
+                    else:
+                        R += CALL_CORRECT
+
+                # Root was previous bidder (i.e., bluffed and got called) and lost?
+                if prev_bidder == root_player and loser == root_player:
+                    R += BLUFF_CALLED_AND_LOST
+
+            # Terminal payoff
             if info.get("terminal"):
-                return 1.0 if info["winner"] == root_player else 0.0
+                winner = info["winner"]
+                R += (WIN_GAME if winner == root_player else LOSE_GAME)
+                return R
+
 
     def _backup(self, path: List[Tuple[Node, Action]], reward: float) -> None:
         for node, a in path:
@@ -186,3 +316,25 @@ class ISMCTSAgent:
             e = node.edges.setdefault(a, EdgeStats())
             e.N += 1
             e.W += reward
+    
+    def _is_impossible_bid(self, obs: Observation, bid: Bid) -> bool:
+        q, f = bid
+        k_mine = count_my_matches(obs.private.my_dice, f)
+        n_unknown = sum(obs.public.dice_left) - len(obs.private.my_dice)
+
+        return q > (k_mine + n_unknown)
+
+    def _bid_prior(self, obs: Observation, bid: Bid) -> Tuple[float, float, int, int]:
+        q, f = bid
+        k_mine = count_my_matches(obs.private.my_dice, f)
+        n_unknown = sum(obs.public.dice_left) - len(obs.private.my_dice)
+        UB = k_mine + n_unknown
+        slack = max(0, UB - q)
+        p_true = self._bid_truth_prob(obs, bid)
+        # prior = (self.prior_w_prob * p_true) + (self.prior_w_slack * (slack / max(1, n_unknown)))
+        # steeper near cap
+        t = slack / max(1, n_unknown)          # in [0,1]
+        penalty = 0.5 ** (1 - t)               # 0.5 at t=0 → 1.0 at t=1
+        prior = p_true * penalty
+
+        return prior, p_true, slack, UB
