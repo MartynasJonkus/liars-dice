@@ -4,19 +4,16 @@ import random
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict, Any
 
-# --- Simple Liar's Dice rules (Perudo-like, simplified) ---
+# --- Simple Liar's Dice rules ---
 # - N players, each starts with D dice (default 5)
 # - Faces 1..6, 1s are wild (count as any face) for showdown
-# - On your turn: either raise the bid (quantity, face) or call "dudo" (liar)
+# - On your turn: either raise the bid (quantity, face) or call (liar)
 # - A new bid must be strictly higher using (quantity, face) ordering:
 #       (q2, f2) > (q1, f1) if q2 > q1 OR (q2 == q1 and f2 > f1)
-# - When "dudo" is called, count dice that match the face OR are 1s; 
-#   if count >= quantity, caller loses a die; else previous bidder loses a die.
-# - Round ends after dudo, dice are re-rolled for remaining players.
+# - When "liar" is called, count dice that match the face OR are 1s; 
+#       if count >= quantity, caller loses a die; else previous bidder loses a die.
+# - Round ends after liar, dice are re-rolled for remaining players.
 # - Game ends when one player has all other players at 0 dice (last with dice wins).
-#
-# Notes:
-# - No palifico, exact calls, or spot-on rules for simplicity (can be extended later).
 
 Bid = Tuple[int, int]  # (quantity, face 1..6)
 

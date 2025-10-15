@@ -62,19 +62,15 @@ class ISMCTSAgent:
         root = Node(key=root_key, player=obs.public.current_player, untried=root_untried)
 
         for _ in range(self.sims_per_move):
-            # 1) Determinize from the live game by deep-copying and redrawing others' dice
             g_det = self._determinize_from_game(game, obs)
 
-            # 2) Selection + Progressive Widening
             path: List[Tuple[Node, Action]] = []
             node = root
             while True:
                 limit = int(max(1, self.pw_c * (node.N ** self.pw_alpha)))
                 if len(node.children) < limit and node.untried:
-                    # Ensure the action we expand is legal in THIS determinization
                     legal_now = set(g_det.legal_actions())
                     while node.untried and node.untried[0] not in legal_now:
-                        # Drop actions that are not legal here (e.g., "liar" with no last_bid)
                         node.untried.pop(0)
 
                     if node.untried:
@@ -98,18 +94,13 @@ class ISMCTSAgent:
                 a = self._select_uct(node)
                 legal_now = set(g_det.legal_actions())
                 if a not in legal_now:
-                    # In this determinization, that child isn't legal (e.g., terminal or no last_bid for "liar")
-                    # Roll out from here instead of forcing an illegal step.
                     break
                 path.append((node, a))
                 g_det.step(a)
                 node = node.children[a]
 
-
-            # 3) Rollout
             reward = self._rollout_to_terminal(g_det, root_player)
 
-            # 4) Backup
             self._backup(path, reward)
 
         if not root.children:
@@ -217,9 +208,8 @@ class ISMCTSAgent:
     def _rollout_to_terminal(self, g: LiarsDiceGame, root_player: int) -> float:
         R = 0.0
         last_actor = None
-        last_action = None  # e.g., ("bid",(q,f)) or ("liar",None)
+        last_action = None
 
-        # Shaping constants (feel free to tune / scale)
         WIN_GAME = 50.0
         LOSE_GAME = -50.0
         BID_NOT_CALLED = 1.0
@@ -242,14 +232,11 @@ class ISMCTSAgent:
                 R += (WIN_GAME if winner == root_player else LOSE_GAME)
                 return R
 
-            # --- Choose rollout action (your existing policy) ---
             last = obs.public.last_bid
             if last is not None:
-                # thresholds (slightly conservative works well with shaping)
                 call_thresh = 0.25
                 raise_thresh = 0.60
 
-                # pick action
                 if self._bid_truth_prob(obs, last) < call_thresh and ("liar", None) in legal:
                     a = ("liar", None)
                 else:
@@ -263,7 +250,6 @@ class ISMCTSAgent:
                             break
                     a = picked if picked else self.rng.choice(legal)
             else:
-                # opening
                 my = obs.private.my_dice
                 best_face = max(range(2, 7), key=lambda f: count_my_matches(my, f))
                 n_unknown = sum(obs.public.dice_left) - len(my)
@@ -274,7 +260,7 @@ class ISMCTSAgent:
                 if a not in legal:
                     a = self.rng.choice(legal)
 
-            # --- PAYOUT: "bid not called" (root bid, next player raised) ---
+            # --- PAYOUT: "bid not called"
             if last_actor == root_player and last_action and last_action[0] == "bid" and a[0] == "bid":
                 R += BID_NOT_CALLED
 
@@ -283,13 +269,12 @@ class ISMCTSAgent:
             last_action = a
             info = g.step(a)
 
-            # --- PAYOUT: showdown outcomes when someone calls Liar! ---
+            # --- PAYOUT: showdown outcomes when someone calls Liar!
             if a[0] == "liar":
                 # showdown entry is last history item
                 h = g._history[-1] if g._history else None
                 payload = h[2] if isinstance(h, tuple) and len(h) >= 3 and isinstance(h[2], dict) else {}
                 loser = payload.get("loser", None)
-                # previous bidder is the "challenger" in your payload; adjust name if needed
                 prev_bidder = payload.get("challenger") or payload.get("previous_bidder")
 
                 # Root called liar?
@@ -331,10 +316,8 @@ class ISMCTSAgent:
         UB = k_mine + n_unknown
         slack = max(0, UB - q)
         p_true = self._bid_truth_prob(obs, bid)
-        # prior = (self.prior_w_prob * p_true) + (self.prior_w_slack * (slack / max(1, n_unknown)))
-        # steeper near cap
-        t = slack / max(1, n_unknown)          # in [0,1]
-        penalty = 0.5 ** (1 - t)               # 0.5 at t=0 → 1.0 at t=1
+        t = slack / max(1, n_unknown)
+        penalty = 0.5 ** (1 - t) 
         prior = p_true * penalty
 
         return prior, p_true, slack, UB

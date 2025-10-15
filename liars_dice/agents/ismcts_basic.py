@@ -42,50 +42,141 @@ class ISMCTSBasicAgent:
         self.rng = random.Random(seed)
 
     # --- Public API ---
+    # def select_action(self, game: LiarsDiceGame, obs: Observation) -> Action:
+    #     root_player = obs.private.my_player
+    #     root_key = self._node_key_from_obs(obs)
+    #     root_untried = list(game.legal_actions())
+    #     root = Node(key=root_key, player = obs.public.current_player, untried = root_untried)
+
+    #     for _ in range(self.sims_per_move):
+    #         # 1) Determinization
+    #         g_det = self._determinize_from_game(game, obs)
+
+    #         # 2) Selection & Expansion
+    #         node = root
+    #         path: List[Tuple[Node, Action]] = []
+
+    #         while True:
+    #             # Expand if we still have untried actions at this information set
+    #             if node.untried:
+    #                 action = self.rng.choice(node.untried)
+    #                 node.untried.remove(action)
+    #                 g_det.step(action)
+
+    #                 child_obs = g_det.observe(g_det._current)
+    #                 child_key = self._node_key_from_obs(child_obs)
+    #                 child_untried = list(g_det.legal_actions())
+    #                 child = Node(key=child_key, player=child_obs.public.current_player, untried=child_untried)
+
+    #                 node.children[action] = child
+    #                 node.edges.setdefault(action, EdgeStats())
+    #                 path.append((node, action))
+    #                 node = child
+    #                 # Go to rollout from the newly added child
+    #                 break  
+
+    #             # Otherwise, select among all already-expanded children with UCT
+    #             if not node.children:
+    #                 # Nothing to select, go to rollout
+    #                 break
+
+    #             action = self._select_uct(node, list(node.children.keys()))
+    #             path.append((node, action))
+    #             g_det.step(action)
+    #             node = node.children[action]
+
+    #         # 3) Rollout
+    #         reward = self._rollout_to_showdown(g_det, root_player)
+
+    #         # 4) Backup
+    #         self._backup(path, reward)
+
+    #     # Pick the most visited action at root (break ties randomly)
+    #     if not root.children:
+    #         # If nothing expanded, fall back to a legal action
+    #         return root_untried[0]
+
+    #     best_action = max(root.children, key = lambda action: (root.edges[action].visit_count, self.rng.random()))
+    #     return best_action
+
     def select_action(self, game: LiarsDiceGame, obs: Observation) -> Action:
+        def is_liar(a: Action) -> bool:
+            return isinstance(a, tuple) and a[0] == "liar"
+
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
         root_untried = list(game.legal_actions())
-        root = Node(key=root_key, player = obs.public.current_player, untried = root_untried)
+        root = Node(key=root_key, player=obs.public.current_player, untried=root_untried)
 
         for _ in range(self.sims_per_move):
-            # 1) Determinization
+            # 1) Determinize hidden dice
             g_det = self._determinize_from_game(game, obs)
 
-            # 2) Selection & Expansion
+            # 2) Tree phase (selection/expansion) with 'liar' treated as terminal
             node = root
             path: List[Tuple[Node, Action]] = []
+            terminated_in_tree = False
 
             while True:
-                # Expand if we still have untried actions at this information set
+                # Expand if possible
                 if node.untried:
-                    action = self.rng.choice(node.untried)
-                    node.untried.remove(action)
-                    g_det.step(action)
+                    a = self.rng.choice(node.untried)
+                    node.untried.remove(a)
 
+                    if is_liar(a):
+                        # Resolve showdown immediately; no child created
+                        before = list(g_det._dice_left)
+                        info = g_det.step(a)
+                        after = g_det._dice_left
+                        root_lost = (after[root_player] < before[root_player])
+                        reward = 0.0 if root_lost else 1.0
+
+                        path.append((node, a))
+                        self._backup(path, reward)
+                        terminated_in_tree = True
+                        break
+
+                    # Normal expansion
+                    g_det.step(a)
                     child_obs = g_det.observe(g_det._current)
                     child_key = self._node_key_from_obs(child_obs)
                     child_untried = list(g_det.legal_actions())
                     child = Node(key=child_key, player=child_obs.public.current_player, untried=child_untried)
 
-                    node.children[action] = child
-                    node.edges.setdefault(action, EdgeStats())
-                    path.append((node, action))
+                    node.children[a] = child
+                    node.edges.setdefault(a, EdgeStats())
+                    path.append((node, a))
                     node = child
-                    # Go to rollout from the newly added child
-                    break  
+                    break  # rollout starts from this new child
 
-                # Otherwise, select among all already-expanded children with UCT
+                # Otherwise, select among existing children
                 if not node.children:
-                    # Nothing to select, go to rollout
+                    break  # nothing expanded yet -> go to rollout
+
+                a = self._select_uct(node, list(node.children.keys()))
+
+                if is_liar(a):
+                    # Resolve showdown immediately; do not descend to a child
+                    before = list(g_det._dice_left)
+                    info = g_det.step(a)
+                    after = g_det._dice_left
+                    root_lost = (after[root_player] < before[root_player])
+                    reward = 0.0 if root_lost else 1.0
+
+                    path.append((node, a))
+                    self._backup(path, reward)
+                    terminated_in_tree = True
                     break
 
-                action = self._select_uct(node, list(node.children.keys()))
-                path.append((node, action))
-                g_det.step(action)
-                node = node.children[action]
+                # Normal selection step
+                g_det.step(a)
+                node = node.children[a]
 
-            # 3) Rollout
+            if terminated_in_tree:
+                # We already backed up; skip rollout for this simulation
+                continue
+
+            # 3) Rollout to SHOWDOWN (first 'liar' or true terminal)
             reward = self._rollout_to_showdown(g_det, root_player)
 
             # 4) Backup
@@ -98,6 +189,7 @@ class ISMCTSBasicAgent:
 
         best_action = max(root.children, key = lambda action: (root.edges[action].visit_count, self.rng.random()))
         return best_action
+
 
     def notify_result(self, obs: Observation, info: dict) -> None:
         return
