@@ -4,7 +4,7 @@ import random
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict, Any
 
-# --- Simple Liar's Dice rules ---
+# --- Liar's Dice rules ---
 # - N players, each starts with D dice (default 5)
 # - Faces 1..6, 1s are wild (count as any face) for showdown
 # - On your turn: either raise the bid (quantity, face) or call (liar)
@@ -100,7 +100,7 @@ class LiarsDiceGame:
         count = 0
         for pid in range(self.num_players):
             for v in self._dice[pid]:
-                if v == face or v == 1:  # 1s are wild
+                if v == face or v == 1:
                     count += 1
         return count
 
