@@ -90,13 +90,13 @@ class ISMCTSPUCTAgent:
                 # AlphaGo Zero-style: select argmax over ALL legal actions (expanded or not)
                 a = self._select_puct_over_all(node)
 
-                # If 'liar' → resolve immediately (no child)
                 if is_liar(a):
                     before = list(g_det._dice_left)
-                    info = g_det.step(a)
+                    g_det.step(a)
                     after = g_det._dice_left
                     root_lost = (after[root_player] < before[root_player])
                     reward = 0.0 if root_lost else 1.0
+
                     # ensure edge exists for backup
                     node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
@@ -104,7 +104,6 @@ class ISMCTSPUCTAgent:
                     terminated_in_tree = True
                     break
 
-                # Otherwise step the game
                 g_det.step(a)
 
                 # Lazily expand child if not present
@@ -127,16 +126,14 @@ class ISMCTSPUCTAgent:
                     self._compute_priors_inplace(node, g_det)
 
             if terminated_in_tree:
-                continue  # go to next simulation
+                continue
 
-            # 3) Rollout: heuristic to the NEXT showdown (or true terminal)
             reward = self._rollout_to_showdown(g_det, root_player)
 
-            # 4) Backup along the path
             self._backup(path, reward)
 
-        # 5) Root decision: most visits among edges that are currently legal
         legal_now = list(game.legal_actions())
+
         if root.edges:
             scored = [(a, e.visit_count) for a, e in root.edges.items() if a in legal_now]
             if scored:
@@ -144,9 +141,9 @@ class ISMCTSPUCTAgent:
                 candidates = [a for a, v in scored if v == best_visits]
                 return self.rng.choice(candidates)
 
-        # Fallback: any legal move (rare)
         if legal_now:
             return self.rng.choice(legal_now)
+        
         return ("liar", None)
 
     def notify_result(self, obs: Observation, info: dict) -> None:
