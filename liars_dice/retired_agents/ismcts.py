@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from liars_dice.core.game import LiarsDiceGame, Observation, Bid
-from liars_dice.agents.heuristic import (
+from liars_dice.agents.baseline_heuristic import (
     count_my_matches,
     success_prob_per_die,
     enumerate_legal_bids,

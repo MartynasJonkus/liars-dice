@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from liars_dice.core.game import LiarsDiceGame, Observation, Bid
 
 Action = Tuple[str, Any]
-NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]  # (player, last_bid, dice_left, history_len)
+NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]
 
 @dataclass
 class EdgeStats:
@@ -51,24 +51,20 @@ class ISMCTSBasicAgent:
         root = Node(key=root_key, player=obs.public.current_player, untried=list(root_actions))
 
         for _ in range(self.sims_per_move):
-            # 1) Determinize hidden dice
             g_det = self._determinize_from_game(game, obs)
 
-            # 2) Tree phase (selection/expansion) with 'liar' treated as terminal
             node = root
             path: List[Tuple[Node, Action]] = []
             terminated_in_tree = False
 
             while True:
-                # Expand if possible
                 if node.untried:
                     a = self.rng.choice(node.untried)
                     node.untried.remove(a)
 
                     if is_liar(a):
-                        # Resolve showdown immediately; no child created
                         before = list(g_det._dice_left)
-                        info = g_det.step(a)
+                        g_det.step(a)
                         after = g_det._dice_left
                         root_lost = (after[root_player] < before[root_player])
                         reward = 0.0 if root_lost else 1.0
@@ -78,7 +74,6 @@ class ISMCTSBasicAgent:
                         terminated_in_tree = True
                         break
 
-                    # Normal expansion
                     g_det.step(a)
                     child_obs = g_det.observe(g_det._current)
                     child_key = self._node_key_from_obs(child_obs)
@@ -89,18 +84,15 @@ class ISMCTSBasicAgent:
                     node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
                     node = child
-                    break  # rollout starts from this new child
+                    break
 
-                # Otherwise, select among existing children
                 if not node.children:
-                    break  # nothing expanded yet -> go to rollout
+                    break
 
                 a = self._select_uct(node, list(node.children.keys()))
 
                 if is_liar(a):
-                    # Resolve showdown immediately; do not descend to a child
                     before = list(g_det._dice_left)
-                    info = g_det.step(a)
                     after = g_det._dice_left
                     root_lost = (after[root_player] < before[root_player])
                     reward = 0.0 if root_lost else 1.0
@@ -110,43 +102,33 @@ class ISMCTSBasicAgent:
                     terminated_in_tree = True
                     break
 
-                # Normal selection step
                 g_det.step(a)
                 node = node.children[a]
 
             if terminated_in_tree:
-                # We already backed up; skip rollout for this simulation
                 continue
 
-            # 3) Rollout to SHOWDOWN (first 'liar' or true terminal)
             reward = self._rollout_to_showdown(g_det, root_player)
 
-            # 4) Backup
             self._backup(path, reward)
-
-        # 5) Choose action at root
+        
         legal_now = list(game.legal_actions())
 
-        # Prefer the most visited action among edges that are still legal now.
         if root.edges:
-            # Filter to legal actions with stats
             scored = [(a, e.visit_count) for a, e in root.edges.items() if a in legal_now]
             if scored:
                 best_visits = max(v for _, v in scored)
                 candidates = [a for a, v in scored if v == best_visits]
                 return self.rng.choice(candidates)
 
-        # Fallback: pick any legal move (should be rare)
         if legal_now:
             return self.rng.choice(legal_now)
 
-        # Absolute fallback (shouldn't happen): raise or return a safe default
         return ("liar", None)
 
     def notify_result(self, obs: Observation, info: dict) -> None:
         return
 
-    # --- Internals ---
     def _node_key_from_obs(self, obs: Observation) -> NodeKey:
         return (
             obs.public.current_player,
