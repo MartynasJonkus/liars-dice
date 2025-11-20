@@ -16,3 +16,5 @@ python -m pip install --upgrade pip
 # Run a demo match
 python cli.py --p liars_dice.agents.heuristic:HeuristicAgent liars_dice.agents.ismcts:ISMCTSAgent liars_dice.agents.random:RandomAgent --players 3
 ```
+
+python -m eval.run_experiments --p liars_dice.agents.heuristic:HeuristicAgent liars_dice.agents.random:RandomAgent liars_dice.agents.ismcts_puct:ISMCTSPUCTAgent --players 3 --dice 5 --num_games 10 --seed 42
