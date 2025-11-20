@@ -38,7 +38,7 @@ class ISMCTSPUCTAgent:
     def __init__(
         self,
         label: str = "ISMCTS-PUCT",
-        sims_per_move: int = 20000,
+        sims_per_move: int = 2000,
         puct_c: float = 0.5,            # softer prior pull than 1.0
         seed: Optional[int] = None,
         # --- prior shaping knobs (domain prior only) ---

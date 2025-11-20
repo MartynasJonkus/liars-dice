@@ -45,7 +45,7 @@ class ISMCTSPWAgent:
     def __init__(
         self,
         label: str = "ISMCTS-ProgressiveWidening",
-        sims_per_move: int = 20000,
+        sims_per_move: int = 2000,
         uct_c: float = math.sqrt(2.0),
         seed: Optional[int] = None,
         # --- heuristic rollout knobs ---
