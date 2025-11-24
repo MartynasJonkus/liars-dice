@@ -1,44 +1,48 @@
 from __future__ import annotations
+
 import copy
 import math
 import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-from liars_dice.core.game import LiarsDiceGame, Observation, Bid
 from liars_dice.agents.helpers import bid_support_for_actor
+from liars_dice.core.game import Bid, LiarsDiceGame, Observation
 
 Action = Tuple[str, Any]
 NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]
+
 
 @dataclass
 class EdgeStats:
     visit_count: int = 0
     value_sum: float = 0.0
+
     @property
     def avg_value(self) -> float:
         return 0.0 if self.visit_count == 0 else self.value_sum / self.visit_count
+
 
 @dataclass
 class Node:
     key: NodeKey
     player: int
     untried: List[Action]
-    children: Dict[Action, 'Node'] = field(default_factory = dict)
-    edges: Dict[Action, EdgeStats] = field(default_factory = dict)
+    children: Dict[Action, "Node"] = field(default_factory=dict)
+    edges: Dict[Action, EdgeStats] = field(default_factory=dict)
     visit_count: int = 0
+
 
 class ISMCTSHeuristicAgent:
     def __init__(
         self,
         label: str = "ISMCTS-Heuristic",
-        sims_per_move: int = 2000,
-        uct_c: float = math.sqrt(2.0),
+        sims_per_move: int = 500,
+        uct_c: float = 1.5,
         seed: Optional[int] = None,
-
-        rollout_theta: float = 0.40,   # call if current bid support < theta
-        rollout_alpha: float = 0.72,   # target plausibility for own raise
-        rollout_eps: float = 0.08,     # small random raise chance
+        rollout_theta: float = 0.40,  # call if current bid support < theta
+        rollout_alpha: float = 0.72,  # target plausibility for own raise
+        rollout_eps: float = 0.08,  # small random raise chance
         rollout_max_steps: int = 40,
     ):
         self.name = label
@@ -58,7 +62,9 @@ class ISMCTSHeuristicAgent:
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
         root_actions = list(game.legal_actions())
-        root = Node(key=root_key, player=obs.public.current_player, untried=list(root_actions))
+        root = Node(
+            key=root_key, player=obs.public.current_player, untried=list(root_actions)
+        )
 
         for _ in range(self.sims_per_move):
             g_det = self._determinize_from_game(game, obs)
@@ -76,7 +82,7 @@ class ISMCTSHeuristicAgent:
                         before = list(g_det._dice_left)
                         g_det.step(a)
                         after = g_det._dice_left
-                        root_lost = (after[root_player] < before[root_player])
+                        root_lost = after[root_player] < before[root_player]
                         reward = 0.0 if root_lost else 1.0
 
                         path.append((node, a))
@@ -88,7 +94,11 @@ class ISMCTSHeuristicAgent:
                     child_obs = g_det.observe(g_det._current)
                     child_key = self._node_key_from_obs(child_obs)
                     child_untried = list(g_det.legal_actions())
-                    child = Node(key=child_key, player=child_obs.public.current_player, untried=child_untried)
+                    child = Node(
+                        key=child_key,
+                        player=child_obs.public.current_player,
+                        untried=child_untried,
+                    )
 
                     node.children[a] = child
                     node.edges.setdefault(a, EdgeStats())
@@ -104,7 +114,7 @@ class ISMCTSHeuristicAgent:
                 if is_liar(a):
                     before = list(g_det._dice_left)
                     after = g_det._dice_left
-                    root_lost = (after[root_player] < before[root_player])
+                    root_lost = after[root_player] < before[root_player]
                     reward = 0.0 if root_lost else 1.0
 
                     path.append((node, a))
@@ -125,7 +135,9 @@ class ISMCTSHeuristicAgent:
         legal_now = list(game.legal_actions())
 
         if root.edges:
-            scored = [(a, e.visit_count) for a, e in root.edges.items() if a in legal_now]
+            scored = [
+                (a, e.visit_count) for a, e in root.edges.items() if a in legal_now
+            ]
             if scored:
                 best_visits = max(v for _, v in scored)
                 candidates = [a for a, v in scored if v == best_visits]
@@ -147,7 +159,9 @@ class ISMCTSHeuristicAgent:
             len(obs.public.history),
         )
 
-    def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
+    def _determinize_from_game(
+        self, game: LiarsDiceGame, obs: Observation
+    ) -> LiarsDiceGame:
         g = copy.deepcopy(game)
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
@@ -177,7 +191,7 @@ class ISMCTSHeuristicAgent:
         if game.num_alive() <= 1:
             winner = game._winner()
             return 1.0 if winner == root_player else 0.0
-        
+
         start_counts = list(game._dice_left)
         steps = 0
 
@@ -223,7 +237,9 @@ class ISMCTSHeuristicAgent:
                     if isinstance(action, tuple) and action[0] == "bid":
                         q, f = action[1]
                         support = bid_support_for_actor(game, actor, (q, f))
-                        if support >= self.rollout_alpha and (min_q is None or q < min_q):
+                        if support >= self.rollout_alpha and (
+                            min_q is None or q < min_q
+                        ):
                             min_q = q
                             candidate = action
                 if candidate is None:
@@ -239,16 +255,20 @@ class ISMCTSHeuristicAgent:
                     if isinstance(action, tuple) and action[0] == "bid":
                         q, f = action[1]
                         support = bid_support_for_actor(game, actor, (q, f))
-                        if support >= self.rollout_alpha and (min_q is None or q < min_q):
+                        if support >= self.rollout_alpha and (
+                            min_q is None or q < min_q
+                        ):
                             min_q = q
                             candidate = action
                 if candidate is None:
-                    bids = [action for action in legal if isinstance(action, tuple) and action[0] == "bid"]
+                    bids = [
+                        action
+                        for action in legal
+                        if isinstance(action, tuple) and action[0] == "bid"
+                    ]
                     candidate = bids[0] if bids else self.rng.choice(legal)
 
             info = game.step(candidate)
             if info.get("terminal"):
                 return 1.0 if info.get("winner") == root_player else 0.0
             continue
-
-
