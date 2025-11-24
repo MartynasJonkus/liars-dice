@@ -1,49 +1,56 @@
 from __future__ import annotations
+
 import copy
 import math
 import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-from liars_dice.core.game import LiarsDiceGame, Observation, Bid
-from helpers import bid_support_for_actor
+from liars_dice.agents.helpers import bid_support_for_actor
+from liars_dice.core.game import Bid, LiarsDiceGame, Observation
 
 Action = Tuple[str, Any]
-NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]  # (player_to_act, last_bid, dice_left[], history_len)
+NodeKey = Tuple[
+    int, Optional[Bid], Tuple[int, ...], int
+]  # (player_to_act, last_bid, dice_left[], history_len)
+
 
 @dataclass
 class EdgeStats:
     visit_count: int = 0
     value_sum: float = 0.0
+
     @property
     def mean_value(self) -> float:
         return 0.0 if self.visit_count == 0 else self.value_sum / self.visit_count
+
 
 @dataclass
 class Node:
     key: NodeKey
     player: int
     # We keep children/edges and a prior table over the FULL legal set for THIS determinization
-    children: Dict[Action, 'Node'] = field(default_factory=dict)
+    children: Dict[Action, "Node"] = field(default_factory=dict)
     edges: Dict[Action, EdgeStats] = field(default_factory=dict)
-    priors: Dict[Action, float] = field(default_factory=dict)  # π(a | I) for THIS determinization
+    priors: Dict[Action, float] = field(
+        default_factory=dict
+    )  # π(a | I) for THIS determinization
     visit_count: int = 0
+
 
 class ISMCTSPUCTAgent:
     def __init__(
         self,
         label: str = "ISMCTS-PUCT",
-        sims_per_move: int = 2000,
+        sims_per_move: int = 500,
         puct_c: float = 0.5,
         seed: Optional[int] = None,
-
-        prior_tau: float = 1.5,         # soften S(q,f) -> prior; <1 sharp, >1 flat
-        liar_exp: float = 1.25,         # prior_liar ~ (1 - S(last_bid)) ** liar_exp
-        prior_floor: float = 1e-6,      # tiny floor so priors never zero
-
-        rollout_theta: float = 0.50,    # call if current bid support < theta
-        rollout_alpha: float = 0.80,    # target plausibility for own raise
-        rollout_eps: float = 0.05,      # small random raise chance
+        prior_tau: float = 1.5,  # soften S(q,f) -> prior; <1 sharp, >1 flat
+        liar_exp: float = 1.25,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
+        prior_floor: float = 1e-6,  # tiny floor so priors never zero
+        rollout_theta: float = 0.50,  # call if current bid support < theta
+        rollout_alpha: float = 0.80,  # target plausibility for own raise
+        rollout_eps: float = 0.05,  # small random raise chance
         rollout_max_steps: int = 40,
     ):
         self.name = label
@@ -94,7 +101,7 @@ class ISMCTSPUCTAgent:
                     before = list(g_det._dice_left)
                     g_det.step(a)
                     after = g_det._dice_left
-                    root_lost = (after[root_player] < before[root_player])
+                    root_lost = after[root_player] < before[root_player]
                     reward = 0.0 if root_lost else 1.0
 
                     # ensure edge exists for backup
@@ -135,7 +142,9 @@ class ISMCTSPUCTAgent:
         legal_now = list(game.legal_actions())
 
         if root.edges:
-            scored = [(a, e.visit_count) for a, e in root.edges.items() if a in legal_now]
+            scored = [
+                (a, e.visit_count) for a, e in root.edges.items() if a in legal_now
+            ]
             if scored:
                 best_visits = max(v for _, v in scored)
                 candidates = [a for a, v in scored if v == best_visits]
@@ -143,7 +152,7 @@ class ISMCTSPUCTAgent:
 
         if legal_now:
             return self.rng.choice(legal_now)
-        
+
         return ("liar", None)
 
     def notify_result(self, obs: Observation, info: dict) -> None:
@@ -157,7 +166,9 @@ class ISMCTSPUCTAgent:
             len(obs.public.history),
         )
 
-    def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
+    def _determinize_from_game(
+        self, game: LiarsDiceGame, obs: Observation
+    ) -> LiarsDiceGame:
         g = copy.deepcopy(game)
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
@@ -210,7 +221,9 @@ class ISMCTSPUCTAgent:
             last_bid = g_det._last_bid  # public
             if last_bid is not None:
                 S_last = bid_support_for_actor(g_det, actor, last_bid)
-                p_liar = max(self.prior_floor, (1.0 - S_last) ** max(1e-6, self.liar_exp))
+                p_liar = max(
+                    self.prior_floor, (1.0 - S_last) ** max(1e-6, self.liar_exp)
+                )
             else:
                 p_liar = self.prior_floor
             priors[("liar", None)] = p_liar
@@ -239,7 +252,7 @@ class ISMCTSPUCTAgent:
         if game.num_alive() <= 1:
             winner = game._winner()
             return 1.0 if winner == root_player else 0.0
-        
+
         start_counts = list(game._dice_left)
         steps = 0
 
@@ -285,7 +298,9 @@ class ISMCTSPUCTAgent:
                     if isinstance(action, tuple) and action[0] == "bid":
                         q, f = action[1]
                         support = bid_support_for_actor(game, actor, (q, f))
-                        if support >= self.rollout_alpha and (min_q is None or q < min_q):
+                        if support >= self.rollout_alpha and (
+                            min_q is None or q < min_q
+                        ):
                             min_q = q
                             candidate = action
                 if candidate is None:
@@ -301,11 +316,17 @@ class ISMCTSPUCTAgent:
                     if isinstance(action, tuple) and action[0] == "bid":
                         q, f = action[1]
                         support = bid_support_for_actor(game, actor, (q, f))
-                        if support >= self.rollout_alpha and (min_q is None or q < min_q):
+                        if support >= self.rollout_alpha and (
+                            min_q is None or q < min_q
+                        ):
                             min_q = q
                             candidate = action
                 if candidate is None:
-                    bids = [action for action in legal if isinstance(action, tuple) and action[0] == "bid"]
+                    bids = [
+                        action
+                        for action in legal
+                        if isinstance(action, tuple) and action[0] == "bid"
+                    ]
                     candidate = bids[0] if bids else self.rng.choice(legal)
 
             info = game.step(candidate)
