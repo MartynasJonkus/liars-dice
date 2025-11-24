@@ -32,8 +32,8 @@ class ISMCTSBasicAgent:
     def __init__(
         self,
         label: str = "ISMCTS-Basic",
-        sims_per_move: int = 20000,
-        uct_c: float = math.sqrt(2.0),
+        sims_per_move: int = 2000,
+        uct_c: float = 1.5,
         seed: Optional[int] = None,
     ):
         self.name = label

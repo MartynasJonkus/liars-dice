@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from liars_dice.core.game import LiarsDiceGame, Observation, Bid
-from helpers import bid_support_for_actor
+from liars_dice.agents.helpers import bid_support_for_actor
 
 Action = Tuple[str, Any]
 NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]
