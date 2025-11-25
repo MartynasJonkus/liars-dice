@@ -17,11 +17,11 @@ def load_agent_with_kwargs(path: str, seed: int, **kwargs):
     name = getattr(agent, "name", cls)
     return agent, name
 
-def play_one_game_sweep(agent_paths: List[str], sims_count: int, dice_per_player: int, seed: int):
+def play_one_game_sweep(agent_paths: List[str], alpha: float, dice_per_player: int, seed: int):
     rng = random.Random(seed)
 
     agents_with_params = [
-        load_agent_with_kwargs(agent_paths[0], seed=rng.randint(0, 10**9), sims_per_move=sims_count),
+        load_agent_with_kwargs(agent_paths[0], seed=rng.randint(0, 10**9), rollout_alpha=alpha),
         load_agent_with_kwargs(agent_paths[1], seed=rng.randint(0, 10**9)),
         load_agent_with_kwargs(agent_paths[2], seed=rng.randint(0, 10**9)),
     ]
@@ -60,12 +60,12 @@ def play_one_game_sweep(agent_paths: List[str], sims_count: int, dice_per_player
 
     return placements.index("ISMCTS-Heuristic") + 1
 
-def run_c_sweep(
-    s_values: List[int],
+def run_sweep(
+    values: List[int],
     num_games: int = 100,
     dice_per_player: int = 5,
-    save_csv: str = "sim_sweep_results.csv",
-    plot_file: str = "sim_sweep_placements.png",
+    save_csv: str = "alpha_sweep_results.csv",
+    plot_file: str = "alpha_sweep_placements.png",
 ):
     agent_paths = [
         "liars_dice.agents.ismcts_1_heuristic:ISMCTSHeuristicAgent",
@@ -75,26 +75,26 @@ def run_c_sweep(
 
     results = []
 
-    for s in s_values:
+    for v in values:
         placement_counts = {1: 0, 2: 0, 3: 0}
 
-        for g in trange(num_games, desc=f"s={s}"):
+        for g in trange(num_games, desc=f"alpha={v}"):
             placement = play_one_game_sweep(
                 agent_paths=agent_paths,
-                sims_count=s,
+                alpha=v,
                 dice_per_player=dice_per_player,
                 seed=random.randint(0, 1_000_000_000),
             )
             placement_counts[placement] += 1
 
         results.append({
-            "s": s,
+            "alpha": v,
             "first": placement_counts[1],
             "second": placement_counts[2],
             "third": placement_counts[3],
         })
 
-        print("s: ", s)
+        print("alpha: ", v)
         print("first: ", placement_counts[1])
         print("second: ", placement_counts[2])
         print("third: ", placement_counts[3])
@@ -104,12 +104,12 @@ def run_c_sweep(
     print(df)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(df["s"], df["first"], marker="o", label="1st place")
-    plt.plot(df["s"], df["second"], marker="o", label="2nd place")
-    plt.plot(df["s"], df["third"], marker="o", label="3rd place")
+    plt.plot(df["alpha"], df["first"], marker="o", label="1st place")
+    plt.plot(df["alpha"], df["second"], marker="o", label="2nd place")
+    plt.plot(df["alpha"], df["third"], marker="o", label="3rd place")
 
-    plt.title("ISMCTS-Heuristic Placement distribution vs number of child nodes expanded per move")
-    plt.xlabel("Number of child nodes per move")
+    plt.title("ISMCTS-Heuristic Placement distribution vs rollout alpha variable")
+    plt.xlabel("Rollout alpha variable")
     plt.ylabel("Number of placements (out of 100 games)")
     plt.grid(True)
     plt.legend()
@@ -121,16 +121,16 @@ def run_c_sweep(
     print(f"Saved plot to {plot_file}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sweep sim count values")
-    parser.add_argument("--csv", type=str, default="sims_sweep_results.csv")
-    parser.add_argument("--plot", type=str, default="sims_sweep_plot.png")
+    parser = argparse.ArgumentParser(description="Sweep rollout alpha values")
+    parser.add_argument("--csv", type=str, default="alpha_sweep_results.csv")
+    parser.add_argument("--plot", type=str, default="alpha_sweep_plot.png")
 
     args = parser.parse_args()
 
-    S_VALUES = [100, 200, 500, 1000, 2000, 5000, 10000, 20000]
+    VALUES = [0.50, 0.60, 0.70, 0.80, 0.90]
 
-    run_c_sweep(
-        s_values=S_VALUES,
+    run_sweep(
+        values=VALUES,
         num_games=100,
         dice_per_player=5,
         save_csv=args.csv,

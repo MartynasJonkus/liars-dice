@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict, Any
+import copy  
 
 # --- Liar's Dice rules ---
 # - N players, each starts with D dice (default 5)
@@ -14,6 +15,37 @@ from typing import List, Tuple, Optional, Dict, Any
 #       if count >= quantity, caller loses a die; else previous bidder loses a die.
 # - Round ends after liar, dice are re-rolled for remaining players.
 # - Game ends when one player has all other players at 0 dice (last with dice wins).
+
+MAX_TOTAL_DICE = 25
+
+# Initialize t -> dict of last_bid -> bids
+PRECOMPUTED_LEGAL_BIDS: Dict[int, Dict[Optional[Bid], List[Tuple[str, Bid]]]] = {}
+
+
+def _precompute_bid_table():
+    for t in range(1, MAX_TOTAL_DICE + 1):
+        PRECOMPUTED_LEGAL_BIDS[t] = {}
+
+        # Case 1: last_bid = None (opening move)
+        bids = []
+        for q in range(1, t + 1):
+            for f in range(1, 7):
+                bids.append(("bid", (q, f)))
+        PRECOMPUTED_LEGAL_BIDS[t][None] = bids
+
+        # Case 2: last_bid = (q,f)
+        for q0 in range(1, t + 1):
+            for f0 in range(1, 7):
+                last = (q0, f0)
+                blist = []
+                for q in range(q0, t + 1):
+                    f_start = f0 + 1 if q == q0 else 1
+                    for f in range(f_start, 7):
+                        blist.append(("bid", (q, f)))
+                PRECOMPUTED_LEGAL_BIDS[t][last] = blist
+
+
+_precompute_bid_table()
 
 Bid = Tuple[int, int]  # (quantity, face 1..6)
 
@@ -65,21 +97,14 @@ class LiarsDiceGame:
         return (q2 > q1) or (q2 == q1 and f2 > f1)
 
     def legal_actions(self) -> List[Tuple[str, Any]]:
-        actions: List[Tuple[str, Any]] = []
         if self.num_alive() <= 1:
-            return actions
+            return []
 
         total_dice = sum(self._dice_left)
-        start_q = 1 if self._last_bid is None else self._last_bid[0]
-        start_f = 1 if self._last_bid is None else self._last_bid[1] + 1
+        actions = PRECOMPUTED_LEGAL_BIDS[total_dice][self._last_bid]
 
-        for q in range(start_q, total_dice + 1):
-            f_start = 1 if (self._last_bid is None or q > self._last_bid[0]) else start_f
-            for f in range(f_start, 7):
-                actions.append(("bid", (q, f)))
-        
         if self._last_bid is not None:
-            actions.append(("liar", None))
+            return actions + [("liar", None)]
         return actions
 
     def observe(self, pid:int) -> Observation:
@@ -95,6 +120,27 @@ class LiarsDiceGame:
             my_dice = list(self._dice[pid])
         )
         return Observation(public = pub, private = priv)
+    
+    def clone_for_determinization(self) -> "LiarsDiceGame":
+        g = object.__new__(LiarsDiceGame)  # bypass __init__
+
+        # Copy simple fields
+        g.num_players = self.num_players
+        g.dice_per_player = self.dice_per_player
+
+        # Copy RNG state (small; preserves behavior most closely to deepcopy)
+        g.rng = copy.deepcopy(self.rng)
+
+        # Copy stateful fields
+        g._dice_left = self._dice_left[:]                   # shallow copy of list[int]
+        g._dice = [d[:] for d in self._dice]                # nested lists for dice
+
+        g._current = self._current
+        g._last_bid = self._last_bid
+        g._history = list(self._history)
+        g._round_active = self._round_active
+
+        return g
 
     def _count_face(self, face:int) -> int:
         count = 0

@@ -17,19 +17,11 @@ def load_agent_with_kwargs(path: str, seed: int, **kwargs):
     name = getattr(agent, "name", cls)
     return agent, name
 
-def play_one_game_c_sweep(agent_paths: List[str], sims_count: int, dice_per_player: int, seed: int):
-    """
-    Plays one 3-player game with:
-        Player 0: ISMCTSBasicAgent(c=c_value)
-        Player 1: HeuristicAgent
-        Player 2: RandomAgent
-
-    Returns the placement (1st, 2nd, 3rd) for ISMCTSBasicAgent.
-    """
+def play_one_game_sweep(agent_paths: List[str], epsilon: float, dice_per_player: int, seed: int):
     rng = random.Random(seed)
 
     agents_with_params = [
-        load_agent_with_kwargs(agent_paths[0], seed=rng.randint(0, 10**9), sims_per_move=sims_count),
+        load_agent_with_kwargs(agent_paths[0], seed=rng.randint(0, 10**9), rollout_eps=epsilon),
         load_agent_with_kwargs(agent_paths[1], seed=rng.randint(0, 10**9)),
         load_agent_with_kwargs(agent_paths[2], seed=rng.randint(0, 10**9)),
     ]
@@ -66,43 +58,43 @@ def play_one_game_c_sweep(agent_paths: List[str], sims_count: int, dice_per_play
 
     placements = eliminated[::-1]
 
-    return placements.index("ISMCTS-Basic") + 1
+    return placements.index("ISMCTS-Heuristic") + 1
 
-def run_c_sweep(
-    s_values: List[int],
+def run_sweep(
+    values: List[int],
     num_games: int = 100,
     dice_per_player: int = 5,
-    save_csv: str = "sim_sweep_results.csv",
-    plot_file: str = "sim_sweep_placements.png",
+    save_csv: str = "epsilon_sweep_results.csv",
+    plot_file: str = "epsilon_sweep_placements.png",
 ):
     agent_paths = [
-        "liars_dice.agents.ismcts_0_basic:ISMCTSBasicAgent",
+        "liars_dice.agents.ismcts_1_heuristic:ISMCTSHeuristicAgent",
         "liars_dice.agents.baseline_heuristic:HeuristicAgent",
         "liars_dice.agents.baseline_random:RandomAgent",
     ]
 
     results = []
 
-    for s in s_values:
+    for v in values:
         placement_counts = {1: 0, 2: 0, 3: 0}
 
-        for g in trange(num_games, desc=f"s={s}"):
-            placement = play_one_game_c_sweep(
+        for g in trange(num_games, desc=f"epsilon={v}"):
+            placement = play_one_game_sweep(
                 agent_paths=agent_paths,
-                sims_count=s,
+                epsilon=v,
                 dice_per_player=dice_per_player,
                 seed=random.randint(0, 1_000_000_000),
             )
             placement_counts[placement] += 1
 
         results.append({
-            "s": s,
+            "epsilon": v,
             "first": placement_counts[1],
             "second": placement_counts[2],
             "third": placement_counts[3],
         })
 
-        print("s: ", s)
+        print("epsilon: ", v)
         print("first: ", placement_counts[1])
         print("second: ", placement_counts[2])
         print("third: ", placement_counts[3])
@@ -112,12 +104,12 @@ def run_c_sweep(
     print(df)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(df["s"], df["first"], marker="o", label="1st place")
-    plt.plot(df["s"], df["second"], marker="o", label="2nd place")
-    plt.plot(df["s"], df["third"], marker="o", label="3rd place")
+    plt.plot(df["epsilon"], df["first"], marker="o", label="1st place")
+    plt.plot(df["epsilon"], df["second"], marker="o", label="2nd place")
+    plt.plot(df["epsilon"], df["third"], marker="o", label="3rd place")
 
-    plt.title("ISMCTS-Basic Placement distribution vs number of child nodes expanded per move")
-    plt.xlabel("Number of child nodes per move")
+    plt.title("ISMCTS-Heuristic Placement distribution vs rollout epsilon variable")
+    plt.xlabel("Rollout epsilon variable")
     plt.ylabel("Number of placements (out of 100 games)")
     plt.grid(True)
     plt.legend()
@@ -129,16 +121,16 @@ def run_c_sweep(
     print(f"Saved plot to {plot_file}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sweep sim count values for ISMCTS-Basic")
-    parser.add_argument("--csv", type=str, default="sims_sweep_results.csv")
-    parser.add_argument("--plot", type=str, default="sims_sweep_plot.png")
+    parser = argparse.ArgumentParser(description="Sweep rollout epsilon values")
+    parser.add_argument("--csv", type=str, default="epsilon_sweep_results.csv")
+    parser.add_argument("--plot", type=str, default="epsilon_sweep_plot.png")
 
     args = parser.parse_args()
 
-    S_VALUES = [100, 200, 500, 1000, 2000, 5000, 10000, 20000]
-
-    run_c_sweep(
-        s_values=S_VALUES,
+    VALUES = [0.0, 0.05, 0.10, 0.15, 0.20]
+    
+    run_sweep(
+        values=VALUES,
         num_games=100,
         dice_per_player=5,
         save_csv=args.csv,

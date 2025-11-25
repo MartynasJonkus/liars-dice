@@ -1,6 +1,5 @@
 
 from __future__ import annotations
-import copy
 import math
 import random
 from dataclasses import dataclass, field
@@ -138,7 +137,7 @@ class ISMCTSBasicAgent:
         )
 
     def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
-        g = copy.deepcopy(game)
+        g = game.clone_for_determinization()
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue

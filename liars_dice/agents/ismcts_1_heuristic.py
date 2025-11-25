@@ -37,12 +37,12 @@ class ISMCTSHeuristicAgent:
     def __init__(
         self,
         label: str = "ISMCTS-Heuristic",
-        sims_per_move: int = 500,
+        sims_per_move: int = 2000,
         uct_c: float = 1.5,
         seed: Optional[int] = None,
-        rollout_theta: float = 0.40,  # call if current bid support < theta
-        rollout_alpha: float = 0.72,  # target plausibility for own raise
-        rollout_eps: float = 0.08,  # small random raise chance
+        rollout_theta: float = 0.50,  # call if current bid support < theta
+        rollout_alpha: float = 0.80,  # target plausibility for own raise
+        rollout_eps: float = 0.05,  # small random raise chance
         rollout_max_steps: int = 40,
     ):
         self.name = label
@@ -162,7 +162,7 @@ class ISMCTSHeuristicAgent:
     def _determinize_from_game(
         self, game: LiarsDiceGame, obs: Observation
     ) -> LiarsDiceGame:
-        g = copy.deepcopy(game)
+        g = game.clone_for_determinization()
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue

@@ -17,14 +17,14 @@ def load_agent_with_kwargs(path: str, seed: int, **kwargs):
     return agent, name
 
 def run_single_game(args):
-    agent_paths, c_value, dice_per_player = args
+    agent_paths, value, dice_per_player = args
 
     rng = random.Random()
 
     agent_specs = [
-        (agent_paths[0], {"uct_c": c_value}),  # ISMCTS tuned
-        (agent_paths[1], {}),                  # Heuristic
-        (agent_paths[2], {}),                  # Random
+        (agent_paths[0], {"rollout_theta": value}),   # ISMCTS tuned
+        (agent_paths[1], {}),                           # Heuristic
+        (agent_paths[2], {}),                           # Random
     ]
 
     rng.shuffle(agent_specs)
@@ -66,11 +66,11 @@ def run_single_game(args):
     return placements.index("ISMCTS-Heuristic") + 1
 
 def run_c_sweep_parallel(
-    c_values: List[float],
+    values: List[float],
     num_games: int = 1000,
     dice_per_player: int = 5,
-    save_csv: str = "c_sweep_results.csv",
-    plot_file: str = "c_sweep_plot.png",
+    save_csv: str = "sweep_results.csv",
+    plot_file: str = "sweep_plot.png",
 ):
     agent_paths = [
         "liars_dice.agents.ismcts_1_heuristic:ISMCTSHeuristicAgent",
@@ -80,10 +80,10 @@ def run_c_sweep_parallel(
 
     results = []
 
-    for c in c_values:
-        print(f"\n=== Running sweep for c = {c} ({num_games} games) ===")
+    for v in values:
+        print(f"\n=== Running sweep for theta = {v} ({num_games} games) ===")
 
-        args_list = [(agent_paths, c, dice_per_player) for _ in range(num_games)]
+        args_list = [(agent_paths, v, dice_per_player) for _ in range(num_games)]
 
         placement_counts = {1: 0, 2: 0, 3: 0}
 
@@ -91,7 +91,7 @@ def run_c_sweep_parallel(
             for placement in tqdm(
                 pool.imap_unordered(run_single_game, args_list),
                 total=len(args_list),
-                desc=f"c={c}"
+                desc=f"v={v}"
             ):
                 placement_counts[placement] += 1
 
@@ -103,7 +103,7 @@ def run_c_sweep_parallel(
         ) / total
 
         results.append({
-            "c": c,
+            "value": v,
             "first": placement_counts[1],
             "second": placement_counts[2],
             "third": placement_counts[3],
@@ -116,16 +116,16 @@ def run_c_sweep_parallel(
     print(df)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(df["c"], df["avg"], marker="o")
+    plt.plot(df["value"], df["avg"], marker="o")
 
-    plt.title("ISMCTS-Heuristic Average placement vs UCT Exploration constant C")
-    plt.xlabel("UCT Exploration constant C")
+    plt.title("ISMCTS-Heuristic Average placement vs Rollout theta constant")
+    plt.xlabel("Rollout theta constant")
     plt.ylabel("Average placement (lower is better)")
     plt.ylim(1, 3)
     plt.yticks([1, 2, 3])
-    for c, avg in zip(df["c"], df["avg"]):
+    for v, avg in zip(df["v"], df["avg"]):
         plt.text(
-            c, avg,
+            v, avg,
             f"{avg:.2f}",
             ha="center", va="bottom",
             fontsize=9
@@ -142,16 +142,16 @@ def run_c_sweep_parallel(
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Parallel UCT-c Sweep for ISMCTS-Heuristic")
-    parser.add_argument("--csv", type=str, default="c_sweep_results.csv")
-    parser.add_argument("--plot", type=str, default="c_sweep_plot.png")
+    parser = argparse.ArgumentParser(description="Parallel sweep for ISMCTS-Heuristic")
+    parser.add_argument("--csv", type=str, default="sweep_results.csv")
+    parser.add_argument("--plot", type=str, default="sweep_plot.png")
     parser.add_argument("--games", type=int, default=1000)
     args = parser.parse_args()
 
-    C_VALUES = [0.1, 0.5, 1.0, 1.5, 2.0, 4.0, 8.0, 16.0]
+    VALUES = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60]
 
     run_c_sweep_parallel(
-        c_values=C_VALUES,
+        values=VALUES,
         num_games=args.games,
         dice_per_player=5,
         save_csv=args.csv,

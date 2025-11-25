@@ -42,9 +42,9 @@ class ISMCTSPUCTAgent:
     def __init__(
         self,
         label: str = "ISMCTS-PUCT",
-        sims_per_move: int = 500,
-        puct_c: float = 0.5,
+        sims_per_move: int = 1000,
         seed: Optional[int] = None,
+        puct_c: float = 0.5,
         prior_tau: float = 1.5,  # soften S(q,f) -> prior; <1 sharp, >1 flat
         liar_exp: float = 1.25,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
         prior_floor: float = 1e-6,  # tiny floor so priors never zero
