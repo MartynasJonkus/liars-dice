@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import math
 import random
 from dataclasses import dataclass, field
@@ -40,9 +39,9 @@ class ISMCTSHeuristicAgent:
         sims_per_move: int = 2000,
         uct_c: float = 1.5,
         seed: Optional[int] = None,
-        rollout_theta: float = 0.50,  # call if current bid support < theta
-        rollout_alpha: float = 0.80,  # target plausibility for own raise
-        rollout_eps: float = 0.05,  # small random raise chance
+        rollout_theta: float = 0.40,
+        rollout_alpha: float = 0.70,
+        rollout_eps: float = 0.15,
         rollout_max_steps: int = 40,
     ):
         self.name = label

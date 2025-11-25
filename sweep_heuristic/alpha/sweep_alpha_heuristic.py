@@ -2,14 +2,13 @@ import importlib
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Any, Dict
-from tqdm import trange
-import argparse
+from multiprocessing import Pool
+from typing import List
+from tqdm import tqdm
 
 from liars_dice.core.game import LiarsDiceGame
 
 def load_agent_with_kwargs(path: str, seed: int, **kwargs):
-    """Load agent from 'module:Class' and pass extra kwargs."""
     module, cls = path.split(":")
     mod = importlib.import_module(module)
     Cls = getattr(mod, cls)
@@ -17,21 +16,27 @@ def load_agent_with_kwargs(path: str, seed: int, **kwargs):
     name = getattr(agent, "name", cls)
     return agent, name
 
-def play_one_game_sweep(agent_paths: List[str], alpha: float, dice_per_player: int, seed: int):
-    rng = random.Random(seed)
+def run_single_game(args):
+    agent_paths, value, dice_per_player = args
 
-    agents_with_params = [
-        load_agent_with_kwargs(agent_paths[0], seed=rng.randint(0, 10**9), rollout_alpha=alpha),
-        load_agent_with_kwargs(agent_paths[1], seed=rng.randint(0, 10**9)),
-        load_agent_with_kwargs(agent_paths[2], seed=rng.randint(0, 10**9)),
+    rng = random.Random()
+
+    agent_specs = [
+        (agent_paths[0], {"rollout_alpha": value}),   # ISMCTS tuned
+        (agent_paths[1], {}),                           # Heuristic
+        (agent_paths[2], {}),                           # Random
     ]
 
-    rng.shuffle(agents_with_params)
+    rng.shuffle(agent_specs)
 
-    agents = [a for a, _ in agents_with_params]
-    names  = [n for _, n in agents_with_params]
+    agents = []
+    names = []
+    for path, kwargs in agent_specs:
+        agent, name = load_agent_with_kwargs(path, seed=rng.randint(0, 10**9), **kwargs)
+        agents.append(agent)
+        names.append(name)
 
-    game = LiarsDiceGame(num_players=3, dice_per_player=dice_per_player, seed=seed)
+    game = LiarsDiceGame(num_players=3, dice_per_player=dice_per_player, seed=rng.randint(0, 10**9))
 
     eliminated = []
 
@@ -40,32 +45,32 @@ def play_one_game_sweep(agent_paths: List[str], alpha: float, dice_per_player: i
         obs = game.observe(pid)
         action = agents[pid].select_action(game, obs)
 
-        legal = game.legal_actions()
-        if action not in legal:
-            raise RuntimeError(f"Illegal action {action} by agent {names[pid]}. Legal: {legal}")
+        if action not in game.legal_actions():
+            raise RuntimeError(f"Illegal action {action} by {names[pid]}")
 
         info = game.step(action)
 
-        for player in range(3):
-            if game._dice_left[player] == 0 and names[player] not in eliminated:
-                eliminated.append(names[player])
+        for p in range(3):
+            if game._dice_left[p] == 0 and names[p] not in eliminated:
+                eliminated.append(names[p])
 
         if info.get("terminal"):
             winner = info["winner"]
-            if winner not in eliminated:
-                eliminated.append(names[winner])
+            winner_name = names[winner]
+            if winner_name not in eliminated:
+                eliminated.append(winner_name)
             break
 
     placements = eliminated[::-1]
 
     return placements.index("ISMCTS-Heuristic") + 1
 
-def run_sweep(
-    values: List[int],
-    num_games: int = 100,
+def run_c_sweep_parallel(
+    values: List[float],
+    num_games: int = 1000,
     dice_per_player: int = 5,
-    save_csv: str = "alpha_sweep_results.csv",
-    plot_file: str = "alpha_sweep_placements.png",
+    save_csv: str = "sweep_results.csv",
+    plot_file: str = "sweep_plot.png",
 ):
     agent_paths = [
         "liars_dice.agents.ismcts_1_heuristic:ISMCTSHeuristicAgent",
@@ -76,62 +81,78 @@ def run_sweep(
     results = []
 
     for v in values:
+        print(f"\n=== Running sweep for alpha = {v} ({num_games} games) ===")
+
+        args_list = [(agent_paths, v, dice_per_player) for _ in range(num_games)]
+
         placement_counts = {1: 0, 2: 0, 3: 0}
 
-        for g in trange(num_games, desc=f"alpha={v}"):
-            placement = play_one_game_sweep(
-                agent_paths=agent_paths,
-                alpha=v,
-                dice_per_player=dice_per_player,
-                seed=random.randint(0, 1_000_000_000),
-            )
-            placement_counts[placement] += 1
+        with Pool() as pool:
+            for placement in tqdm(
+                pool.imap_unordered(run_single_game, args_list),
+                total=len(args_list),
+                desc=f"v={v}"
+            ):
+                placement_counts[placement] += 1
+
+        total = sum(placement_counts.values())
+        avg = (
+            1 * placement_counts[1]
+            + 2 * placement_counts[2]
+            + 3 * placement_counts[3]
+        ) / total
 
         results.append({
-            "alpha": v,
+            "value": v,
             "first": placement_counts[1],
             "second": placement_counts[2],
             "third": placement_counts[3],
+            "avg": avg
         })
-
-        print("alpha: ", v)
-        print("first: ", placement_counts[1])
-        print("second: ", placement_counts[2])
-        print("third: ", placement_counts[3])
 
     df = pd.DataFrame(results)
     df.to_csv(save_csv, index=False)
+    print("\n=== SWEEP RESULTS ===")
     print(df)
 
     plt.figure(figsize=(10, 5))
-    plt.plot(df["alpha"], df["first"], marker="o", label="1st place")
-    plt.plot(df["alpha"], df["second"], marker="o", label="2nd place")
-    plt.plot(df["alpha"], df["third"], marker="o", label="3rd place")
+    plt.plot(df["value"], df["avg"], marker="o")
 
-    plt.title("ISMCTS-Heuristic Placement distribution vs rollout alpha variable")
-    plt.xlabel("Rollout alpha variable")
-    plt.ylabel("Number of placements (out of 100 games)")
+    plt.title("ISMCTS-Heuristic Average placement vs Rollout alpha constant")
+    plt.xlabel("Rollout alpha constant")
+    plt.ylabel("Average placement (lower is better)")
+    plt.ylim(1, 3)
+    plt.yticks([1, 2, 3])
+    for v, avg in zip(df["value"], df["avg"]):
+        plt.text(
+            v, avg,
+            f"{avg:.2f}",
+            ha="center", va="bottom",
+            fontsize=9
+        )
     plt.grid(True)
-    plt.legend()
     plt.tight_layout()
     plt.savefig(plot_file)
     plt.close()
 
-    print(f"\nSaved CSV to {save_csv}")
-    print(f"Saved plot to {plot_file}")
+    print(f"\nSaved CSV: {save_csv}")
+    print(f"Saved plot: {plot_file}")
+
+    return df
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Sweep rollout alpha values")
-    parser.add_argument("--csv", type=str, default="alpha_sweep_results.csv")
-    parser.add_argument("--plot", type=str, default="alpha_sweep_plot.png")
-
+    import argparse
+    parser = argparse.ArgumentParser(description="Parallel sweep for ISMCTS-Heuristic")
+    parser.add_argument("--csv", type=str, default="sweep_results.csv")
+    parser.add_argument("--plot", type=str, default="sweep_plot.png")
+    parser.add_argument("--games", type=int, default=1000)
     args = parser.parse_args()
 
     VALUES = [0.50, 0.60, 0.70, 0.80, 0.90]
 
-    run_sweep(
+    run_c_sweep_parallel(
         values=VALUES,
-        num_games=100,
+        num_games=args.games,
         dice_per_player=5,
         save_csv=args.csv,
         plot_file=args.plot,

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import math
 import random
 from dataclasses import dataclass, field
@@ -12,7 +11,7 @@ from liars_dice.core.game import Bid, LiarsDiceGame, Observation
 Action = Tuple[str, Any]
 NodeKey = Tuple[
     int, Optional[Bid], Tuple[int, ...], int
-]  # (player_to_act, last_bid, dice_left[], history_len)
+]
 
 
 @dataclass
@@ -42,15 +41,15 @@ class ISMCTSPUCTAgent:
     def __init__(
         self,
         label: str = "ISMCTS-PUCT",
-        sims_per_move: int = 1000,
+        sims_per_move: int = 500,
         seed: Optional[int] = None,
         puct_c: float = 0.5,
         prior_tau: float = 1.5,  # soften S(q,f) -> prior; <1 sharp, >1 flat
         liar_exp: float = 1.25,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
         prior_floor: float = 1e-6,  # tiny floor so priors never zero
-        rollout_theta: float = 0.50,  # call if current bid support < theta
-        rollout_alpha: float = 0.80,  # target plausibility for own raise
-        rollout_eps: float = 0.05,  # small random raise chance
+        rollout_theta: float = 0.40,
+        rollout_alpha: float = 0.70,
+        rollout_eps: float = 0.15,
         rollout_max_steps: int = 40,
     ):
         self.name = label
@@ -169,7 +168,7 @@ class ISMCTSPUCTAgent:
     def _determinize_from_game(
         self, game: LiarsDiceGame, obs: Observation
     ) -> LiarsDiceGame:
-        g = copy.deepcopy(game)
+        g = game.clone_for_determinization()
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue
