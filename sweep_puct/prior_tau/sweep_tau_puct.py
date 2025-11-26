@@ -22,7 +22,7 @@ def run_single_game(args):
     rng = random.Random()
 
     agent_specs = [
-        (agent_paths[0], {"puct_c": value}),   # ISMCTS tuned
+        (agent_paths[0], {"prior_tau": value}),   # ISMCTS tuned
         (agent_paths[1], {}),                  # Heuristic
         (agent_paths[2], {}),                  # Random
     ]
@@ -81,7 +81,7 @@ def run_c_sweep_parallel(
     results = []
 
     for v in values:
-        print(f"\n=== Running sweep for puct_c = {v} ({num_games} games) ===")
+        print(f"\n=== Running sweep for prior_tau = {v} ({num_games} games) ===")
 
         args_list = [(agent_paths, v, dice_per_player) for _ in range(num_games)]
 
@@ -118,8 +118,8 @@ def run_c_sweep_parallel(
     plt.figure(figsize=(10, 5))
     plt.plot(df["value"], df["avg"], marker="o")
 
-    plt.title("ISMCTS-PUCT Average placement vs PUCT constant C")
-    plt.xlabel("PUCT constant C")
+    plt.title("ISMCTS-PUCT Average placement vs Prior constant tau")
+    plt.xlabel("Prior constant tau")
     plt.ylabel("Average placement (lower is better)")
     plt.ylim(1, 3)
     plt.yticks([1, 2, 3])
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--games", type=int, default=1000)
     args = parser.parse_args()
 
-    VALUES = [0.1, 0.5, 1.0, 1.5, 2.0, 4.0, 8.0, 16.0]
+    VALUES = [0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
 
     run_c_sweep_parallel(
         values=VALUES,
