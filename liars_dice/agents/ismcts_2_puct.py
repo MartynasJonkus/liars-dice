@@ -9,9 +9,7 @@ from liars_dice.agents.helpers import bid_support_for_actor
 from liars_dice.core.game import Bid, LiarsDiceGame, Observation
 
 Action = Tuple[str, Any]
-NodeKey = Tuple[
-    int, Optional[Bid], Tuple[int, ...], int
-]
+NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]
 
 
 @dataclass
@@ -44,8 +42,8 @@ class ISMCTSPUCTAgent:
         sims_per_move: int = 1000,
         seed: Optional[int] = None,
         puct_c: float = 1.5,
-        prior_tau: float = 1.5,  # soften S(q,f) -> prior; <1 sharp, >1 flat
-        liar_exp: float = 1.25,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
+        prior_tau: float = 1.0,  # soften S(q,f) -> prior; <1 sharp, >1 flat
+        liar_exp: float = 0.5,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
         prior_floor: float = 1e-6,  # tiny floor so priors never zero
         rollout_theta: float = 0.40,
         rollout_alpha: float = 0.70,
