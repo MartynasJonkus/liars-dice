@@ -45,8 +45,8 @@ class ISMCTSHistoryAgent:
         prior_tau: float = 1.0,  # soften S(q,f) -> prior; <1 sharp, >1 flat
         liar_exp: float = 0.5,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
         prior_floor: float = 1e-6,  # tiny floor so priors never zero
-        hist_beta: float = 0.5,
-        hist_gamma: float = 1.0,
+        hist_beta: float = 1.0,
+        hist_gamma: float = 4.0,
         rollout_theta: float = 0.40,
         rollout_alpha: float = 0.70,
         rollout_eps: float = 0.15,
