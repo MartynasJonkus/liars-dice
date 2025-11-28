@@ -45,7 +45,7 @@ class ISMCTSHistoryAgent:
         prior_tau: float = 1.0,  # soften S(q,f) -> prior; <1 sharp, >1 flat
         liar_exp: float = 0.5,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
         prior_floor: float = 1e-6,  # tiny floor so priors never zero
-        hist_beta: float = 1.0,
+        hist_beta: float = 0.5,
         hist_gamma: float = 1.0,
         rollout_theta: float = 0.40,
         rollout_alpha: float = 0.70,
@@ -75,6 +75,8 @@ class ISMCTSHistoryAgent:
 
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
+
+        g_debug = self._determinize_from_game(game, obs, debug=True)
 
         # Root node (lazy expansion: no untried list; we always pick by PUCT over priors)
         root = Node(
@@ -179,55 +181,141 @@ class ISMCTSHistoryAgent:
     #         g._dice[pid] = [self.rng.randint(1, 6) for _ in range(n)]
     #     return g
 
+    # def weighted_sample(self, probs):
+    #     r = self.rng.random()
+    #     acc = 0
+    #     for f,p in enumerate(probs, start=1):
+    #         acc += p
+    #         if r <= acc:
+    #             return f
+    #     return 6
+
+    # def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
+    #     g = game.clone_for_determinization()
+
+    #     # Collect bid history once
+    #     hist = g._history
+    #     face_freq = {pid: [0]*7 for pid in range(g.num_players)}
+    #     qty_max  = {pid: 1 for pid in range(g.num_players)}
+
+    #     for pid, kind, data in hist:
+    #         if kind == "bid":
+    #             q, f = data
+    #             face_freq[pid][f] += 1
+    #             qty_max[pid] = max(qty_max[pid], q)
+
+    #     # Sample dice using history-biased priors
+    #     for pid in range(g.num_players):
+    #         if pid == obs.private.my_player:
+    #             continue
+
+    #         dice_cnt = g._dice_left[pid]
+    #         hf = face_freq[pid]
+    #         total_bids = sum(hf)
+    #         base = [1/6]*7
+
+    #         probs = []
+    #         for f in range(1,6+1):
+    #             freq = (hf[f] / total_bids) if total_bids > 0 else 0.0
+    #             p = base[f] * (1 + self.hist_beta * freq)  # β is tunable
+    #             probs.append(p)
+
+    #         # Player bid large quantities → inflate chance of matching faces
+    #         scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
+    #         probs = [p * scale for p in probs]
+
+    #         # Normalize
+    #         Z = sum(probs)
+    #         probs = [p/Z for p in probs]
+
+    #         # Finally sample dice for this opponent
+    #         g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
+
+    #     return g
+
     def weighted_sample(self, probs):
         r = self.rng.random()
         acc = 0
-        for f,p in enumerate(probs, start=1):
+        for f, p in enumerate(probs, start=1):
             acc += p
             if r <= acc:
                 return f
-        return 6
+        return 6  # fallback
 
-    def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
+    def _determinize_from_game(self, game, obs, debug=False):
         g = game.clone_for_determinization()
-        
-        # Collect bid history once
-        hist = g._history
-        face_freq = {pid: [0]*7 for pid in range(g.num_players)}
-        qty_max  = {pid: 1 for pid in range(g.num_players)}
 
+        # Keep only actions since the most recent "showdown"
+        hist = []
+        for event in reversed(g._history):
+            if isinstance(event, tuple) and event[0] == "showdown":
+                break
+            hist.append(event)
+        hist.reverse()
+
+        face_freq = {pid: [0] * 7 for pid in range(g.num_players)}
+        qty_max = {pid: 1 for pid in range(g.num_players)}
+
+        # --- Extract history ---
         for pid, kind, data in hist:
             if kind == "bid":
                 q, f = data
                 face_freq[pid][f] += 1
                 qty_max[pid] = max(qty_max[pid], q)
 
-        # Sample dice using history-biased priors
+        if debug:
+            print("\n=== HISTORY DETECTED ===")
+            for pid in range(g.num_players):
+                print(
+                    f"Player {pid} bid faces:", face_freq[pid], "max qty:", qty_max[pid]
+                )
+
+        # --- Determinization per opponent ---
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue
-            
+
             dice_cnt = g._dice_left[pid]
             hf = face_freq[pid]
             total_bids = sum(hf)
-            base = [1/6]*7
 
+            # Base uniform distribution
+            base = [1 / 6] * 7
+
+            # Compute β-adjusted face weights
             probs = []
-            for f in range(1,6+1):
-                freq = (hf[f] / total_bids) if total_bids > 0 else 0.0
-                p = base[f] * (1 + self.hist_beta * freq)  # β is tunable
+            for face in range(1, 7):
+                freq = (hf[face] / total_bids) if total_bids > 0 else 0
+                p = base[face] * (1 + self.hist_beta * freq)
                 probs.append(p)
 
-            # Player bid large quantities → inflate chance of matching faces
+            # γ scaling for aggression
             scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
             probs = [p * scale for p in probs]
 
             # Normalize
             Z = sum(probs)
-            probs = [p/Z for p in probs]
+            probs = [p / Z for p in probs]
 
-            # Finally sample dice for this opponent
+            if debug:
+                print(f"\nOpponent {pid}:")
+                print(" Raw face freq:", hf[1:])
+                print(" Base uniform: [1/6,...]")
+                print(
+                    f" β={self.hist_beta} → freq-weighted probs:",
+                    [round(x, 4) for x in probs],
+                )
+                print(
+                    f" γ={self.hist_gamma} → scaled probs:",
+                    [round(x, 4) for x in probs],
+                )
+                print(" Normalized probs:", [round(x, 3) for x in probs])
+
+            # Sample dice
             g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
+
+            if debug:
+                print(" Sampled dice:", g._dice[pid])
 
         return g
 
