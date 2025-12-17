@@ -148,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--games", type=int, default=1000)
     args = parser.parse_args()
 
-    VALUES = [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]
+    VALUES = [0.0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0]
 
     run_c_sweep_parallel(
         values=VALUES,

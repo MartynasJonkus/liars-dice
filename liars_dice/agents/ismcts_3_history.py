@@ -26,12 +26,11 @@ class EdgeStats:
 class Node:
     key: NodeKey
     player: int
-    # We keep children/edges and a prior table over the FULL legal set for THIS determinization
     children: Dict[Action, "Node"] = field(default_factory=dict)
     edges: Dict[Action, EdgeStats] = field(default_factory=dict)
     priors: Dict[Action, float] = field(
         default_factory=dict
-    )  # π(a | I) for THIS determinization
+    )
     visit_count: int = 0
 
 
@@ -42,9 +41,9 @@ class ISMCTSHistoryAgent:
         sims_per_move: int = 1000,
         seed: Optional[int] = None,
         puct_c: float = 1.5,
-        prior_tau: float = 1.0,  # soften S(q,f) -> prior; <1 sharp, >1 flat
-        liar_exp: float = 0.5,  # prior_liar ~ (1 - S(last_bid)) ** liar_exp
-        prior_floor: float = 1e-6,  # tiny floor so priors never zero
+        prior_tau: float = 1.0,
+        liar_exp: float = 0.5,
+        prior_floor: float = 1e-6,
         hist_beta: float = 1.0,
         hist_gamma: float = 4.0,
         rollout_theta: float = 0.40,
@@ -76,9 +75,6 @@ class ISMCTSHistoryAgent:
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
 
-        g_debug = self._determinize_from_game(game, obs, debug=True)
-
-        # Root node (lazy expansion: no untried list; we always pick by PUCT over priors)
         root = Node(
             key=root_key,
             player=obs.public.current_player,
@@ -88,17 +84,15 @@ class ISMCTSHistoryAgent:
             g_det = self._determinize_from_game(game, obs)
 
             node = root
-            self._compute_priors_inplace(node, g_det)  # priors for THIS determinization
+            self._compute_priors_inplace(node, g_det)
 
             path: List[Tuple[Node, Action]] = []
             terminated_in_tree = False
 
             while True:
-                # If no legal moves (shouldn't happen mid-round), break to rollout
                 if not node.priors:
                     break
 
-                # AlphaGo Zero-style: select argmax over ALL legal actions (expanded or not)
                 a = self._select_puct_over_all(node)
 
                 if is_liar(a):
@@ -108,7 +102,6 @@ class ISMCTSHistoryAgent:
                     root_lost = after[root_player] < before[root_player]
                     reward = 0.0 if root_lost else 1.0
 
-                    # ensure edge exists for backup
                     node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
                     self._backup(path, reward)
@@ -117,7 +110,6 @@ class ISMCTSHistoryAgent:
 
                 g_det.step(a)
 
-                # Lazily expand child if not present
                 if a not in node.children:
                     child_obs = g_det.observe(g_det._current)
                     child_key = self._node_key_from_obs(child_obs)
@@ -126,11 +118,9 @@ class ISMCTSHistoryAgent:
                     node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
                     node = child
-                    # compute priors for child in THIS determinization and rollout from here
                     self._compute_priors_inplace(node, g_det)
-                    break  # rollout will start from this new child
+                    break
                 else:
-                    # already expanded: descend and recompute priors at the child
                     node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
                     node = node.children[a]
@@ -170,69 +160,6 @@ class ISMCTSHistoryAgent:
             len(obs.public.history),
         )
 
-    # def _determinize_from_game(
-    #     self, game: LiarsDiceGame, obs: Observation
-    # ) -> LiarsDiceGame:
-    #     g = game.clone_for_determinization()
-    #     for pid in range(g.num_players):
-    #         if pid == obs.private.my_player:
-    #             continue
-    #         n = g._dice_left[pid]
-    #         g._dice[pid] = [self.rng.randint(1, 6) for _ in range(n)]
-    #     return g
-
-    # def weighted_sample(self, probs):
-    #     r = self.rng.random()
-    #     acc = 0
-    #     for f,p in enumerate(probs, start=1):
-    #         acc += p
-    #         if r <= acc:
-    #             return f
-    #     return 6
-
-    # def _determinize_from_game(self, game: LiarsDiceGame, obs: Observation) -> LiarsDiceGame:
-    #     g = game.clone_for_determinization()
-
-    #     # Collect bid history once
-    #     hist = g._history
-    #     face_freq = {pid: [0]*7 for pid in range(g.num_players)}
-    #     qty_max  = {pid: 1 for pid in range(g.num_players)}
-
-    #     for pid, kind, data in hist:
-    #         if kind == "bid":
-    #             q, f = data
-    #             face_freq[pid][f] += 1
-    #             qty_max[pid] = max(qty_max[pid], q)
-
-    #     # Sample dice using history-biased priors
-    #     for pid in range(g.num_players):
-    #         if pid == obs.private.my_player:
-    #             continue
-
-    #         dice_cnt = g._dice_left[pid]
-    #         hf = face_freq[pid]
-    #         total_bids = sum(hf)
-    #         base = [1/6]*7
-
-    #         probs = []
-    #         for f in range(1,6+1):
-    #             freq = (hf[f] / total_bids) if total_bids > 0 else 0.0
-    #             p = base[f] * (1 + self.hist_beta * freq)  # β is tunable
-    #             probs.append(p)
-
-    #         # Player bid large quantities → inflate chance of matching faces
-    #         scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
-    #         probs = [p * scale for p in probs]
-
-    #         # Normalize
-    #         Z = sum(probs)
-    #         probs = [p/Z for p in probs]
-
-    #         # Finally sample dice for this opponent
-    #         g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
-
-    #     return g
-
     def weighted_sample(self, probs):
         r = self.rng.random()
         acc = 0
@@ -240,12 +167,11 @@ class ISMCTSHistoryAgent:
             acc += p
             if r <= acc:
                 return f
-        return 6  # fallback
+        return 6
 
     def _determinize_from_game(self, game, obs, debug=False):
         g = game.clone_for_determinization()
 
-        # Keep only actions since the most recent "showdown"
         hist = []
         for event in reversed(g._history):
             if isinstance(event, tuple) and event[0] == "showdown":
@@ -256,7 +182,6 @@ class ISMCTSHistoryAgent:
         face_freq = {pid: [0] * 7 for pid in range(g.num_players)}
         qty_max = {pid: 1 for pid in range(g.num_players)}
 
-        # --- Extract history ---
         for pid, kind, data in hist:
             if kind == "bid":
                 q, f = data
@@ -270,7 +195,6 @@ class ISMCTSHistoryAgent:
                     f"Player {pid} bid faces:", face_freq[pid], "max qty:", qty_max[pid]
                 )
 
-        # --- Determinization per opponent ---
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue
@@ -279,21 +203,17 @@ class ISMCTSHistoryAgent:
             hf = face_freq[pid]
             total_bids = sum(hf)
 
-            # Base uniform distribution
             base = [1 / 6] * 7
 
-            # Compute β-adjusted face weights
             probs = []
             for face in range(1, 7):
                 freq = (hf[face] / total_bids) if total_bids > 0 else 0
                 p = base[face] * (1 + self.hist_beta * freq)
                 probs.append(p)
 
-            # γ scaling for aggression
             scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
             probs = [p * scale for p in probs]
 
-            # Normalize
             Z = sum(probs)
             probs = [p / Z for p in probs]
 
@@ -311,7 +231,6 @@ class ISMCTSHistoryAgent:
                 )
                 print(" Normalized probs:", [round(x, 3) for x in probs])
 
-            # Sample dice
             g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
 
             if debug:
@@ -320,37 +239,23 @@ class ISMCTSHistoryAgent:
         return g
 
     def _select_puct_over_all(self, node: Node) -> Action:
-        """
-        score(a) = Q(s,a) + c_puct * P(s,a) * sqrt(N(s)) / (1 + N(s,a))
-        Iterate over ALL legal actions available at this node in THIS determinization
-        (i.e., node.priors keys). If an action has never been visited, Q=0, N=0.
-        """
-        # Use max(1, N) so we have non-zero exploration at virgin nodes
         sqrt_N = math.sqrt(max(1, node.visit_count))
         best, best_val = None, -1e18
         for a, prior in node.priors.items():
-            e = node.edges.get(a)  # may be None if unexpanded
+            e = node.edges.get(a)
             n_a = 0 if e is None else e.visit_count
             q_a = 0.0 if e is None else e.mean_value
             u = q_a + self.puct_c * prior * (sqrt_N / (1.0 + n_a))
-            # random tie-break to avoid deterministic ties
             u += 1e-12 * self.rng.random()
             if u > best_val:
                 best_val, best = u, a
-        return best  # type: ignore
+        return best
 
     def _compute_priors_inplace(self, node: Node, g_det: LiarsDiceGame) -> None:
-        """
-        Compute actor-centric priors π(a|I) for legal actions at this node in THIS determinization.
-        - For bids (q,f): π ∝ S_actor(q,f)^(1/τ)
-        - For liar: π ∝ (1 - S_actor(last_bid))^liar_exp
-        Normalize to sum 1 (with floor) among legal actions.
-        """
         legal = list(g_det.legal_actions())
         priors: Dict[Action, float] = {}
 
         actor = node.player
-        # Bids
         for a in legal:
             if isinstance(a, tuple) and a[0] == "bid":
                 q, f = a[1]
@@ -358,9 +263,8 @@ class ISMCTSHistoryAgent:
                 base = max(self.prior_floor, S ** (1.0 / max(1e-6, self.prior_tau)))
                 priors[a] = base
 
-        # Liar (only if legal)
         if any(isinstance(x, tuple) and x[0] == "liar" for x in legal):
-            last_bid = g_det._last_bid  # public
+            last_bid = g_det._last_bid
             if last_bid is not None:
                 S_last = bid_support_for_actor(g_det, actor, last_bid)
                 p_liar = max(
@@ -370,7 +274,6 @@ class ISMCTSHistoryAgent:
                 p_liar = self.prior_floor
             priors[("liar", None)] = p_liar
 
-        # Normalize over legal
         s = sum(priors.values())
         if s <= 0.0:
             u = 1.0 / max(1, len(legal))
