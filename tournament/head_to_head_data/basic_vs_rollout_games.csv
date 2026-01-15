@@ -1,0 +1,1001 @@
+game_id, config, placement_1     , placement_2     , placement_3
+      3, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+      0, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+      1, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+      4, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+      7, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+      5, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+      2, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+      6, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     14, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     12, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     15, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+      8, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     10, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+      9, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     11, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     13, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     19, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     17, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     18, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     21, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     22, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     16, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     20, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     23, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     25, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     26, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     24, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     29, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     28, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     31, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     30, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     27, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     32, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     33, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     34, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     35, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     36, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     38, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     39, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     37, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     40, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     43, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     45, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     42, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     41, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     44, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     46, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     47, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     49, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     48, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     50, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     51, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     54, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     52, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     53, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     55, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     58, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     57, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     56, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     59, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     60, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     61, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     62, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     63, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     65, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     64, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     66, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     68, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     67, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     69, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     70, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     71, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     73, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     72, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     75, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     76, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     74, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     77, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     78, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     79, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     80, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     81, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     83, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     82, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     85, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     84, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     87, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     86, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     88, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     90, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     91, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     89, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     92, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     95, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+     94, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     93, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     96, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     97, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+     98, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    100, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+     99, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    101, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    102, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    103, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    105, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    104, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    107, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    106, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    108, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    110, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    109, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    112, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    111, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    114, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    113, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    115, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    116, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    117, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    118, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    119, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    120, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    123, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    122, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    121, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    124, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    126, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    125, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    128, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    127, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    130, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    129, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    132, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    131, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    133, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    134, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    135, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    136, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    137, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    140, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    138, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    139, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    141, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    143, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    142, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    145, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    144, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    147, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    146, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    148, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    149, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    150, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    152, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    151, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    153, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    154, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    157, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    155, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    156, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    159, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    158, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    161, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    160, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    162, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    163, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    165, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    164, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    167, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    170, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    169, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    166, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    168, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    172, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    173, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    171, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    174, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    175, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    176, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    177, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    178, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    179, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    180, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    182, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    181, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    183, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    184, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    185, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    186, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    187, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    188, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    190, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    189, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    191, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    192, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    195, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    193, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    194, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    196, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    197, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    198, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    199, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    200, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    202, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    201, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    203, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    204, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    205, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    208, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    207, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    206, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    209, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    211, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    212, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    210, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    213, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    216, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    215, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    218, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    214, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    217, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    219, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    220, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    221, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    223, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    222, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    225, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    224, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    227, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    226, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    228, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    229, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    230, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    232, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    231, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    233, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    234, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    235, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    236, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    237, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    238, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    240, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    239, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    241, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    242, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    243, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    244, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    245, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    246, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    247, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    248, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    249, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    251, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    250, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    252, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    253, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    255, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    254, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    256, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    258, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    257, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    260, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    259, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    261, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    262, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    264, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    263, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    265, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    267, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    266, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    268, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    269, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    270, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    271, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    273, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    272, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    275, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    274, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    277, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    276, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    278, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    279, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    281, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    280, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    283, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    282, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    284, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    285, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    286, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    288, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    287, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    291, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    290, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    292, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    289, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    293, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    294, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    295, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    297, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    296, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    298, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    300, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    299, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    301, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    303, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    302, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    304, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    308, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    309, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    305, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    306, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    307, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    310, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    312, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    311, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    315, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    313, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    314, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    316, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    317, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    318, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    319, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    320, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    323, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    321, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    322, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    324, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    327, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    325, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    326, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    328, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    329, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    330, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    331, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    333, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    332, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    335, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    334, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    336, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    337, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    338, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    339, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    340, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    341, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    342, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    343, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    344, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    346, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    345, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    347, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    350, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    348, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    351, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    349, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    352, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    353, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    354, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    355, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    356, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    358, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    357, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    359, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    360, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    362, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    361, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    363, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    364, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    365, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    366, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    367, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    369, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    370, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    368, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    371, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    372, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    373, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    374, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    375, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    376, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    378, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    377, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    379, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    380, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    381, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    382, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    385, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    386, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    383, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    387, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    384, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    388, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    390, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    389, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    391, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    392, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    393, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    394, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    397, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    395, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    396, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    398, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    399, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    400, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    402, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    404, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    401, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    403, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    405, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    406, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    407, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    408, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    412, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    410, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    411, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    409, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    413, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    414, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    416, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    415, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    417, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    418, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    420, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    419, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    421, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    423, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    422, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    424, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    426, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    427, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    425, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    428, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    429, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    430, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    431, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    432, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    433, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    434, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    435, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    437, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    436, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    438, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    440, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    439, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    441, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    442, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    443, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    444, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    448, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    447, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    445, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    446, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    449, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    450, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    451, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    452, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    454, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    453, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    455, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    456, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    459, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    458, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    457, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    460, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    462, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    463, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    461, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    465, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    464, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    467, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    466, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    468, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    470, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    471, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    469, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    473, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    475, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    472, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    474, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    476, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    477, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    479, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    478, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    481, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    480, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    482, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    483, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    484, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    485, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    486, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    487, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    488, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    491, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    489, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    490, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    492, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    493, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    495, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    494, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    496, A2_B1 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Basic
+    500, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    498, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    501, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    497, A2_B1 , ISMCTS-Basic    , ISMCTS-Basic    , ISMCTS-Heuristic
+    499, A2_B1 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Basic
+    503, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    504, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    502, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    506, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    505, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    507, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    508, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    509, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    510, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    512, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    513, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    515, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    511, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    517, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    514, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    516, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    519, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    520, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    518, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    521, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    522, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    523, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    525, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    524, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    528, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    526, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    527, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    529, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    531, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    532, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    530, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    533, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    534, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    535, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    536, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    538, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    537, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    540, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    539, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    544, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    541, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    542, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    543, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    545, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    546, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    547, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    550, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    548, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    549, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    551, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    552, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    553, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    554, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    556, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    555, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    559, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    557, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    558, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    560, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    562, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    561, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    563, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    566, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    565, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    564, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    567, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    568, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    569, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    570, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    573, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    571, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    574, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    572, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    575, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    576, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    578, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    577, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    580, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    584, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    581, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    579, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    582, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    583, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    585, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    586, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    587, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    588, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    591, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    589, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    590, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    593, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    592, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    594, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    595, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    596, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    597, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    598, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    599, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    600, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    601, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    604, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    605, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    603, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    602, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    607, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    606, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    608, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    609, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    610, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    611, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    612, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    614, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    613, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    615, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    616, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    617, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    619, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    618, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    620, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    622, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    621, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    623, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    625, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    624, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    626, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    627, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    628, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    630, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    629, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    631, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    633, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    634, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    632, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    635, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    636, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    638, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    637, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    640, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    639, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    642, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    641, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    643, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    644, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    645, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    648, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    646, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    649, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    647, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    650, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    652, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    651, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    654, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    653, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    655, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    656, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    657, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    658, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    660, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    659, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    661, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    663, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    662, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    664, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    665, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    666, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    667, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    671, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    672, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    668, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    670, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    669, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    673, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    674, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    675, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    678, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    676, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    679, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    677, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    680, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    681, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    682, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    683, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    685, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    687, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    688, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    686, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    684, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    689, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    693, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    690, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    691, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    695, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    692, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    694, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    696, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    700, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    698, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    699, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    697, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    701, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    702, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    703, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    704, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    705, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    706, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    708, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    707, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    709, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    711, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    710, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    712, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    713, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    715, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    714, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    718, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    716, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    720, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    719, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    717, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    721, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    726, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    722, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    723, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    725, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    724, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    727, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    728, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    729, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    732, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    730, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    731, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    734, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    735, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    733, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    736, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    737, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    739, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    741, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    738, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    740, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    742, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    743, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    744, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    746, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    745, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    747, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    748, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    749, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    751, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    750, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    754, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    752, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    755, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    753, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    757, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    759, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    756, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    758, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    760, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    761, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    762, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    763, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    765, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    766, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    767, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    764, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    769, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    768, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    770, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    772, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    771, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    773, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    774, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    775, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    776, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    777, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    778, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    779, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    780, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    781, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    783, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    782, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    784, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    785, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    786, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    788, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    789, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    791, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    787, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    792, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    790, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    793, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    794, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    798, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    795, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    799, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    796, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    797, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    800, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    801, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    804, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    803, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    802, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    806, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    805, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    807, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    808, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    809, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    815, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    810, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    811, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    814, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    812, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    813, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    816, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    819, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    818, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    817, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    820, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    822, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    821, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    823, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    824, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    826, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    825, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    827, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    828, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    831, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    830, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    829, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    832, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    834, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    833, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    836, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    837, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    835, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    840, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    838, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    839, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    842, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    841, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    843, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    848, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    844, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    846, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    845, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    847, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    850, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    849, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    851, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    856, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    852, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    853, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    854, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    857, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    855, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    858, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    859, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    860, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    861, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    864, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    862, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    863, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    865, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    866, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    867, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    868, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    871, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    873, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    869, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    874, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    870, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    872, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    875, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    878, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    877, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    876, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    882, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    880, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    881, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    879, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    883, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    884, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    885, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    890, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    888, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    889, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    886, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    887, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    891, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    892, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    896, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    893, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    894, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    897, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    898, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    895, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    899, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    900, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    901, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    903, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    902, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    905, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    906, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    904, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    907, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    908, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    909, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    911, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    913, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    910, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    912, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    914, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    915, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    917, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    918, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    916, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    919, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    921, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    920, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    922, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    923, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    927, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    925, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    924, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    926, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    928, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    929, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    930, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    932, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    931, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    933, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    934, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    937, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    935, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    936, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    938, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    940, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    939, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    941, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    944, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    943, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    946, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    942, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    945, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    947, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    950, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    948, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    949, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    951, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    952, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    954, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    953, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    955, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    956, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    958, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    957, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    960, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    959, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    961, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    962, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    963, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    964, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    967, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    966, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    968, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    965, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    969, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    970, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    971, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    972, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    974, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    973, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    975, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    977, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    976, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    979, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    978, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    980, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    982, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    985, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    981, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    984, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    983, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    986, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    987, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    988, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    989, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    990, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    992, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    991, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    993, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    994, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    995, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    996, A1_B2 , ISMCTS-Basic    , ISMCTS-Heuristic, ISMCTS-Heuristic
+    997, A1_B2 , ISMCTS-Heuristic, ISMCTS-Basic    , ISMCTS-Heuristic
+    999, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic
+    998, A1_B2 , ISMCTS-Heuristic, ISMCTS-Heuristic, ISMCTS-Basic

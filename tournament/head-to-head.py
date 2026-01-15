@@ -1,9 +1,10 @@
 import importlib
 import random
 import time
-import pandas as pd
 from multiprocessing import Pool
-from typing import Tuple, Dict, Any, List
+from typing import Any, Dict, List, Tuple
+
+import pandas as pd
 from tqdm import tqdm
 
 from liars_dice.core.game import LiarsDiceGame
@@ -11,6 +12,7 @@ from liars_dice.core.game import LiarsDiceGame
 # ----------------------------
 # Agent loading
 # ----------------------------
+
 
 def load_agent(path: str, seed: int):
     module, cls = path.split(":")
@@ -23,6 +25,7 @@ def load_agent(path: str, seed: int):
 # ----------------------------
 # Single game runner
 # ----------------------------
+
 
 def run_single_game(args):
     (
@@ -68,7 +71,7 @@ def run_single_game(args):
         action = agents[pid].select_action(game, obs)
         t1 = time.perf_counter()
 
-        time_spent[pid] += (t1 - t0)
+        time_spent[pid] += t1 - t0
 
         info = game.step(action)
 
@@ -92,11 +95,13 @@ def run_single_game(args):
 
     time_rows = []
     for pid, name in enumerate(names):
-        time_rows.append({
-            "game_id": game_id,
-            "agent": name,
-            "time": time_spent[pid],
-        })
+        time_rows.append(
+            {
+                "game_id": game_id,
+                "agent": name,
+                "time": time_spent[pid],
+            }
+        )
 
     return {
         "game_id": game_id,
@@ -108,6 +113,7 @@ def run_single_game(args):
 # ----------------------------
 # Tournament runner
 # ----------------------------
+
 
 def run_head_to_head(
     agent_A_path: str,
@@ -125,13 +131,15 @@ def run_head_to_head(
     gid = 0
     for config in ["A2_B1", "A1_B2"]:
         for _ in range(num_games):
-            args.append((
-                gid,
-                config,
-                agent_A_path,
-                agent_B_path,
-                dice_per_player,
-            ))
+            args.append(
+                (
+                    gid,
+                    config,
+                    agent_A_path,
+                    agent_B_path,
+                    dice_per_player,
+                )
+            )
             gid += 1
 
     with Pool() as pool:
@@ -157,8 +165,7 @@ def run_head_to_head(
     df_time = pd.DataFrame(all_time_rows)
 
     avg_time = (
-        df_time
-        .groupby("agent")["time"]
+        df_time.groupby("agent")["time"]
         .mean()
         .reset_index()
         .rename(columns={"time": "avg_move_time"})
@@ -181,31 +188,33 @@ def run_head_to_head(
             seen[agent] = min(seen.get(agent, 3), i)
 
         for agent, best_place in seen.items():
-            rows.append({
-                "agent": agent,
-                "best_place": best_place,
-            })
+            rows.append(
+                {
+                    "agent": agent,
+                    "best_place": best_place,
+                }
+            )
 
     df_best = pd.DataFrame(rows)
 
     mean_place = (
-        df_best
-        .groupby("agent")["best_place"]
+        df_best.groupby("agent")["best_place"]
         .mean()
         .reset_index()
         .rename(columns={"best_place": "mean_placement"})
     )
 
     summary = (
-        df_best
-        .groupby("agent")["best_place"]
+        df_best.groupby("agent")["best_place"]
         .value_counts()
         .unstack(fill_value=0)
-        .rename(columns={
-            1: "first",
-            2: "second",
-            3: "third",
-        })
+        .rename(
+            columns={
+                1: "first",
+                2: "second",
+                3: "third",
+            }
+        )
         .reset_index()
     )
 
@@ -215,19 +224,19 @@ def run_head_to_head(
     summary = summary.merge(mean_place, on="agent", how="left")
     summary = summary.merge(avg_time, on="agent", how="left")
 
-
     summary.to_csv(out_summary_csv, index=False)
 
     print("\nSaved:")
     print(f"  Per-game results → {out_games_csv}")
     print(f"  Aggregated results → {out_summary_csv}")
 
+
 if __name__ == "__main__":
     run_head_to_head(
-        agent_A_path="liars_dice.agents.ismcts_0_basic:ISMCTSBasicAgent",
-        agent_B_path="liars_dice.agents.ismcts_1_heuristic:ISMCTSHeuristicAgent",
-        num_games=10,
+        agent_A_path="liars_dice.agents.ismcts_2_puct:ISMCTSPUCTAgent",
+        agent_B_path="liars_dice.agents.ismcts_3_history:ISMCTSHistoryAgent",
+        num_games=500,
         dice_per_player=5,
-        out_games_csv="head_to_head_games.csv",
-        out_summary_csv="head_to_head_summary.csv",
+        out_games_csv="puct_vs_history_games.csv",
+        out_summary_csv="puct_vs_history_summary.csv",
     )

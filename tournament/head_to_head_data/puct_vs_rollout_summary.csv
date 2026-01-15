@@ -1,0 +1,3 @@
+agent           , first, second, third, games, win_rate, mean_placement, avg_move_time
+ISMCTS-Heuristic,     0,    500,   500,  1000,      0.0,            2.5, 4.9191130647334
+ISMCTS-PUCT     ,  1000,      0,     0,  1000,      1.0,            1.0, 7.143677899733406
