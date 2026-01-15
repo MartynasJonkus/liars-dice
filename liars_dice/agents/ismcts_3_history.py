@@ -45,7 +45,7 @@ class ISMCTSHistoryAgent:
         liar_exp: float = 0.5,
         prior_floor: float = 1e-6,
         hist_beta: float = 1.0,
-        hist_gamma: float = 4.0,
+        hist_gamma: float = 0.0,
         rollout_theta: float = 0.40,
         rollout_alpha: float = 0.70,
         rollout_eps: float = 0.15,
@@ -169,7 +169,7 @@ class ISMCTSHistoryAgent:
                 return f
         return 6
 
-    def _determinize_from_game(self, game, obs, debug=False):
+    def _determinize_from_game(self, game, obs):
         g = game.clone_for_determinization()
 
         hist = []
@@ -187,13 +187,6 @@ class ISMCTSHistoryAgent:
                 q, f = data
                 face_freq[pid][f] += 1
                 qty_max[pid] = max(qty_max[pid], q)
-
-        if debug:
-            print("\n=== HISTORY DETECTED ===")
-            for pid in range(g.num_players):
-                print(
-                    f"Player {pid} bid faces:", face_freq[pid], "max qty:", qty_max[pid]
-                )
 
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
@@ -217,24 +210,7 @@ class ISMCTSHistoryAgent:
             Z = sum(probs)
             probs = [p / Z for p in probs]
 
-            if debug:
-                print(f"\nOpponent {pid}:")
-                print(" Raw face freq:", hf[1:])
-                print(" Base uniform: [1/6,...]")
-                print(
-                    f" β={self.hist_beta} → freq-weighted probs:",
-                    [round(x, 4) for x in probs],
-                )
-                print(
-                    f" γ={self.hist_gamma} → scaled probs:",
-                    [round(x, 4) for x in probs],
-                )
-                print(" Normalized probs:", [round(x, 3) for x in probs])
-
             g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
-
-            if debug:
-                print(" Sampled dice:", g._dice[pid])
 
         return g
 
