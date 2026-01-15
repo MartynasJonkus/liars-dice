@@ -1,0 +1,6 @@
+agent,first,second,third,fourth,games,mean_placement,win_rate
+Heuristic,2,27,11,0,40,2.225,0.05
+ISMCTS-Basic,0,0,12,28,40,3.7,0.0
+ISMCTS-Heuristic,0,0,18,22,40,3.55,0.0
+ISMCTS-History,26,10,4,0,40,1.45,0.65
+ISMCTS-PUCT,22,13,5,0,40,1.575,0.55
