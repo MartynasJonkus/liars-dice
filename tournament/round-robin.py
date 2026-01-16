@@ -1,11 +1,13 @@
 import importlib
 import random
-import pandas as pd
 from itertools import combinations
 from multiprocessing import Pool
+
+import pandas as pd
 from tqdm import tqdm
 
 from liars_dice.core.game import LiarsDiceGame
+
 
 def load_agent(path: str, seed: int):
     module, cls = path.split(":")
@@ -13,6 +15,7 @@ def load_agent(path: str, seed: int):
     Cls = getattr(mod, cls)
     agent = Cls(seed=seed)
     return agent, agent.name
+
 
 def run_single_game(args):
     game_id, agent_paths, dice_per_player = args
@@ -30,9 +33,7 @@ def run_single_game(args):
         names.append(name)
 
     game = LiarsDiceGame(
-        num_players=4,
-        dice_per_player=dice_per_player,
-        seed=rng.randint(0, 10**9)
+        num_players=4, dice_per_player=dice_per_player, seed=rng.randint(0, 10**9)
     )
 
     eliminated = []
@@ -68,12 +69,13 @@ def run_single_game(args):
         "p4": placements[3],
     }
 
+
 def run_round_robin(
     agent_paths,
     games_per_combo=1000,
     dice_per_player=5,
     raw_csv="round_robin_games.csv",
-    summary_csv="round_robin_summary.csv"
+    summary_csv="round_robin_summary.csv",
 ):
     combos = list(combinations(agent_paths, 4))
     all_results = []
@@ -89,7 +91,7 @@ def run_round_robin(
         for res in tqdm(
             pool.imap_unordered(run_single_game, args),
             total=len(args),
-            desc="Running round-robin"
+            desc="Running round-robin",
         ):
             all_results.append(res)
 
@@ -107,23 +109,19 @@ def run_round_robin(
     rows = []
     for _, row in df_games.iterrows():
         for place, col in enumerate(["p1", "p2", "p3", "p4"], start=1):
-            rows.append({
-                "agent": row[col],
-                "placement": place
-            })
+            rows.append({"agent": row[col], "placement": place})
 
     df_long = pd.DataFrame(rows)
 
     summary = (
-        df_long
-        .groupby("agent")["placement"]
+        df_long.groupby("agent")["placement"]
         .agg(
             first=lambda x: (x == 1).sum(),
             second=lambda x: (x == 2).sum(),
             third=lambda x: (x == 3).sum(),
             fourth=lambda x: (x == 4).sum(),
             games="count",
-            mean_placement="mean"
+            mean_placement="mean",
         )
         .reset_index()
     )
@@ -150,6 +148,6 @@ if __name__ == "__main__":
 
     run_round_robin(
         agent_paths=AGENTS,
-        games_per_combo=10,
+        games_per_combo=1000,
         dice_per_player=5,
     )
