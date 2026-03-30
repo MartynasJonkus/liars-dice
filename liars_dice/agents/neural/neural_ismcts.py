@@ -6,12 +6,12 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
-from action_mapping import ActionMapper
-from encoder import ObservationEncoder
-from nn_model import PolicyNetwork
+from .action_mapping import ActionMapper
+from .encoder import ObservationEncoder
+from .nn_model import PolicyNetwork
 
-from liars_dice.agents.helpers import bid_support_for_actor
-from liars_dice.core.game import Bid, LiarsDiceGame, Observation
+from ..helpers import bid_support_for_actor
+from ...core.game import Bid, LiarsDiceGame, Observation
 
 Action = Tuple[str, Any]
 NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]

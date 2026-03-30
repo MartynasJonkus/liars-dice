@@ -10,11 +10,11 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from liars_dice.agents.ismcts_3_history import ISMCTSHistoryAgent
-from liars_dice.agents.neural.action_mapping import ActionMapper
-from liars_dice.agents.neural.encoder import ObservationEncoder
-from liars_dice.agents.neural.nn_model import PolicyNetwork
-from liars_dice.core.game import LiarsDiceGame, Observation
+from ..agents.ismcts_3_history import ISMCTSHistoryAgent
+from ..agents.neural.action_mapping import ActionMapper
+from ..agents.neural.encoder import ObservationEncoder
+from ..agents.neural.nn_model import PolicyNetwork
+from ..core.game import LiarsDiceGame, Observation
 
 Action = Tuple[str, Any]
 
