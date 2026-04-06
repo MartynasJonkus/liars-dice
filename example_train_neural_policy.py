@@ -7,10 +7,12 @@ from liars_dice.agents.neural.encoder import ObservationEncoder
 from liars_dice.agents.neural.neural_ismcts import NeuralISMCTSPUCTAgent
 from liars_dice.agents.neural.nn_model import PolicyNetwork
 from liars_dice.core.game import LiarsDiceGame
-from liars_dice.training.training_pipeline import (
+from liars_dice.training.data_collection import (
     SupervisedSelfPlayCollector,
-    TrainingConfig,
     VisitTracingHistoryAgent,
+)
+from liars_dice.training.training_pipeline import (
+    TrainingConfig,
     save_model_checkpoint,
     train_policy_network,
 )

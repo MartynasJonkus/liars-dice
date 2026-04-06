@@ -90,12 +90,12 @@ class NeuralISMCTSPUCTAgent:
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
         root = Node(key=root_key, player=obs.public.current_player)
+        self._compute_priors_inplace(root, game)
 
         for _ in range(self.sims_per_move):
             g_det = self._determinize_from_game(game, obs)
 
             node = root
-            self._compute_priors_inplace(node, g_det)
 
             path: List[Tuple[Node, Action]] = []
             terminated_in_tree = False

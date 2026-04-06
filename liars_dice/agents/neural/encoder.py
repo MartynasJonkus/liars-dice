@@ -100,12 +100,12 @@ class ObservationEncoder:
             features.append(1.0)
 
         # Truncated recent current-round public bid history.
-        round_history = self._current_round_history(history)
-        recent = round_history[-self.history_len :]
+        round_bids = self._current_round_bid_history(history)
+        recent = round_bids[-self.history_len :]
         pad = self.history_len - len(recent)
         features.extend([0.0] * (pad * self.history_entry_dim))
         for event in recent:
-            features.extend(self._encode_history_event(event))
+            features.extend(self._encode_bid_event(event))
 
         if len(features) != self.input_dim:
             raise AssertionError(
