@@ -3,28 +3,29 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, List, Sequence, Tuple
 
-from liars_dice.core.game import Observation
+from ...core.game import Observation
 
 
 @dataclass(frozen=True)
 class ObservationEncoder:
-    """Encodes a 4-player Liar's Dice observation into a fixed-size feature vector.
+    """
+    Encodes a 4-player Liar's Dice observation into a fixed-size feature vector.
 
     Feature layout:
-        0..5   : own dice face counts, normalized by current own dice count
-        6..9   : dice left per player, normalized by max_dice_per_player
-        10..13 : alive indicators for each player
-        14..17 : current player one-hot
-        18..21 : observing player one-hot
-        22     : last bid quantity, normalized by max_total_dice
-        23..28 : last bid face one-hot (all zeros if no bid)
-        29     : has last bid flag
-        30..99 : recent history entries (K=5 by default), each entry contributes 14:
-                 - actor one-hot (4)
-                 - action type one-hot: bid / liar / showdown (3)
-                 - bid quantity normalized (1)
-                 - bid face one-hot (6)
-                 showdown entries are ignored and encoded as zeros except type flag.
+    - own dice face counts (normalized): 6
+    - dice left per player (normalized): 4
+    - alive flags per player: 4
+    - current player one-hot: 4
+    - observing player one-hot: 4
+    - last bid quantity (normalized): 1
+    - last bid face one-hot: 6
+    - has-last-bid flag: 1
+    - recent current-round bid history: history_len * history_entry_dim
+
+    Each history entry encodes only a bid event:
+    - actor one-hot: 4
+    - bid quantity (normalized): 1
+    - bid face one-hot: 6
     """
 
     num_players: int = 4
@@ -34,19 +35,19 @@ class ObservationEncoder:
 
     @property
     def history_entry_dim(self) -> int:
-        return self.num_players + 3 + 1 + 6
+        return self.num_players + 1 + 6  # actor + quantity + face
 
     @property
     def input_dim(self) -> int:
         base_dim = (
-            6
-            + self.num_players
-            + self.num_players
-            + self.num_players
-            + self.num_players
-            + 1
-            + 6
-            + 1
+            6  # own dice face counts
+            + self.num_players  # dice left
+            + self.num_players  # alive flags
+            + self.num_players  # current player one-hot
+            + self.num_players  # observing player one-hot
+            + 1  # last bid quantity
+            + 6  # last bid face one-hot
+            + 1  # has-last-bid flag
         )
         return base_dim + self.history_len * self.history_entry_dim
 
@@ -60,38 +61,35 @@ class ObservationEncoder:
 
         if len(dice_left) != self.num_players:
             raise ValueError(
-                f"Encoder expects {self.num_players} players, got {len(dice_left)}"
+                f"Encoder configured for {self.num_players} players, "
+                f"but observation has {len(dice_left)} players."
             )
 
         features: List[float] = []
 
-        # Own dice counts by face as a fraction of total own dice
+        # Own dice as normalized face counts.
         own_total = max(1, len(my_dice))
         for face in range(1, 7):
             count = sum(1 for d in my_dice if d == face)
             features.append(count / own_total)
 
-        # Public dice counts as a fraction of maximum dice per player
+        # Public per-player dice counts and alive flags.
         for count in dice_left:
             features.append(count / float(self.max_dice_per_player))
-
-        # Indicator of alive players
         for count in dice_left:
             features.append(1.0 if count > 0 else 0.0)
 
-        # Current turn player one-hot
+        # Turn / seat identity.
         for pid in range(self.num_players):
             features.append(1.0 if pid == current_player else 0.0)
-
-        # Observing player one-hot
         for pid in range(self.num_players):
             features.append(1.0 if pid == my_player else 0.0)
 
-        # Last bid
+        # Last bid.
         if last_bid is None:
-            features.append(0.0)
-            features.extend([0.0] * 6)
-            features.append(0.0)
+            features.append(0.0)  # quantity
+            features.extend([0.0] * 6)  # face
+            features.append(0.0)  # has-last-bid
         else:
             q, face = last_bid
             features.append(q / float(self.max_total_dice))
@@ -103,14 +101,16 @@ class ObservationEncoder:
         round_bids = self._current_round_bid_history(history)
         recent = round_bids[-self.history_len :]
         pad = self.history_len - len(recent)
+
         features.extend([0.0] * (pad * self.history_entry_dim))
         for event in recent:
             features.extend(self._encode_bid_event(event))
 
         if len(features) != self.input_dim:
             raise AssertionError(
-                f"Unexpected feature length {len(features)} != {self.input_dim}"
+                f"Encoded feature length {len(features)} does not match input_dim {self.input_dim}"
             )
+
         return features
 
     def _current_round_bid_history(
@@ -157,15 +157,11 @@ class ObservationEncoder:
         ):
             return out
 
-        kind_offset = self.num_players
-        qty_offset = self.num_players + 3
+        qty_offset = self.num_players
         face_offset = qty_offset + 1
 
         # Actor one-hot.
         out[pid] = 1.0
-
-        # Event type one-hot. Only bid is used, but kept for stable shape.
-        out[kind_offset + 0] = 1.0
 
         q, face = data
         out[qty_offset] = q / float(self.max_total_dice)

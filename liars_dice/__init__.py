@@ -1,2 +1,2 @@
 
-__all__ = ["core", "agents"]
+__all__ = ["core", "agents", "training"]

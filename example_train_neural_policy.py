@@ -17,6 +17,7 @@ from liars_dice.training.training_pipeline import (
     train_policy_network,
 )
 
+from pathlib import Path
 
 def main() -> None:
     action_mapper = ActionMapper(max_total_dice=20)
@@ -68,10 +69,21 @@ def main() -> None:
     history = train_policy_network(model, samples, config)
     print("Loss history:", history["loss"])
 
+
+
+    Path("artifacts").mkdir(parents=True, exist_ok=True)
+
     save_model_checkpoint(
-        model, encoder, action_mapper, "/mnt/data/neural_policy_checkpoint.pt"
+        model,
+        encoder,
+        action_mapper,
+        "artifacts/neural_policy_checkpoint.pt",
     )
-    collector.save_samples_jsonl(samples, "/mnt/data/supervised_policy_samples.jsonl")
+
+    collector.save_samples_jsonl(
+        samples,
+        "artifacts/supervised_samples.jsonl",
+    )
 
     agent = NeuralISMCTSPUCTAgent(
         model=model,
