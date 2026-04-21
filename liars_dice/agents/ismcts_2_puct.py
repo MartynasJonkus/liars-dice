@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import random
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -28,9 +29,7 @@ class Node:
     player: int
     children: Dict[Action, "Node"] = field(default_factory=dict)
     edges: Dict[Action, EdgeStats] = field(default_factory=dict)
-    priors: Dict[Action, float] = field(
-        default_factory=dict
-    )
+    priors: Dict[Action, float] = field(default_factory=dict)
     visit_count: int = 0
 
 
@@ -38,7 +37,8 @@ class ISMCTSPUCTAgent:
     def __init__(
         self,
         label: str = "ISMCTS-PUCT",
-        sims_per_move: int = 1000,
+        sims_per_move: int | None = 500,
+        time_limit_s: float | None = None,
         seed: Optional[int] = None,
         puct_c: float = 1.5,
         prior_tau: float = 1.0,
@@ -51,6 +51,8 @@ class ISMCTSPUCTAgent:
     ):
         self.name = label
         self.sims_per_move = sims_per_move
+        self.time_limit_s = time_limit_s
+        self._last_sim_count = 0
         self.puct_c = puct_c
         self.rng = random.Random(seed)
 
@@ -75,7 +77,10 @@ class ISMCTSPUCTAgent:
             player=obs.public.current_player,
         )
 
-        for _ in range(self.sims_per_move):
+        start_time = time.perf_counter()
+        sim_count = 0
+
+        while self._should_continue(sim_count, start_time):
             g_det = self._determinize_from_game(game, obs)
 
             node = root
@@ -121,12 +126,16 @@ class ISMCTSPUCTAgent:
                     node = node.children[a]
                     self._compute_priors_inplace(node, g_det)
 
+            sim_count += 1
+
             if terminated_in_tree:
                 continue
 
             reward = self._rollout_to_showdown(g_det, root_player)
 
             self._backup(path, reward)
+
+        self._last_sim_count = sim_count
 
         legal_now = list(game.legal_actions())
 
@@ -146,6 +155,23 @@ class ISMCTSPUCTAgent:
 
     def notify_result(self, obs: Observation, info: dict) -> None:
         return
+
+    def _should_continue(self, sim_count: int, start_time: float) -> bool:
+        if self.sims_per_move is None and self.time_limit_s is None:
+            raise ValueError(
+                "At least one of sims_per_move or time_limit_s must be set"
+            )
+
+        if self.sims_per_move is not None and sim_count >= self.sims_per_move:
+            return False
+
+        if (
+            self.time_limit_s is not None
+            and (time.perf_counter() - start_time) >= self.time_limit_s
+        ):
+            return False
+
+        return True
 
     def _node_key_from_obs(self, obs: Observation) -> NodeKey:
         return (

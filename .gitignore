@@ -31,3 +31,6 @@ ENV/
 # --- macOS / Windows junk ---
 .DS_Store
 Thumbs.db
+
+artifacts/eval
+artifacts/supervised_data
