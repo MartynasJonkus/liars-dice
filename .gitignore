@@ -33,4 +33,4 @@ ENV/
 Thumbs.db
 
 artifacts/eval
-artifacts/supervised_data
+artifacts/data*

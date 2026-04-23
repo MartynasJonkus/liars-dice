@@ -140,19 +140,20 @@ class ObservationEncoder:
             tokens.append(token)
             prev_bid = event[2]
 
-        # Right padding
-        pad_len = self.max_bids - len(tokens)
-        if pad_len < 0:
-            raise AssertionError("pad_len should never be negative")
-
         zero_token = [0.0] * self.bid_token_dim
-        padded_tokens = tokens + [zero_token for _ in range(pad_len)]
-        bid_mask = [False] * len(tokens) + [True] * pad_len  # True = padded
 
-        if len(padded_tokens) != self.max_bids:
-            raise AssertionError("Incorrect padded bid history length")
-        if len(bid_mask) != self.max_bids:
-            raise AssertionError("Incorrect bid mask length")
+        # Important: transformer cannot handle sequences where all tokens are masked.
+        # So if the round history is empty, keep one dummy token unmasked.
+        if len(tokens) == 0:
+            padded_tokens = [zero_token] + [
+                zero_token for _ in range(self.max_bids - 1)
+            ]
+            bid_mask = [False] + [True for _ in range(self.max_bids - 1)]
+            return padded_tokens, bid_mask
+
+        pad_len = self.max_bids - len(tokens)
+        padded_tokens = tokens + [zero_token for _ in range(pad_len)]
+        bid_mask = [False] * len(tokens) + [True] * pad_len
 
         return padded_tokens, bid_mask
 

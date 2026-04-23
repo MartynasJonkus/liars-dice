@@ -19,26 +19,34 @@ NUM_PLAYERS = 4
 DICE_PER_PLAYER = 5
 BASE_SEED = 12345
 
-TIME_LIMIT_S = 0.200  # 200 ms per move for throughput benchmark
-SIMS_PER_MOVE = 500  # 500 sims per move for cost-per-sim benchmark
+TIME_LIMIT_S = 0.200  # throughput benchmark
+SIMS_PER_MOVE = 500  # cost-per-simulation benchmark
 
-CHECKPOINT_PATH = "artifacts/policy_training/best.pt"
-
-AGENTS = {
-    "PUCT": "liars_dice.agents.ismcts_2_puct:ISMCTSPUCTAgent",
-    "History": "liars_dice.agents.ismcts_3_history:ISMCTSHistoryAgent",
-    "Neural": "liars_dice.agents.neural.neural_ismcts:NeuralISMCTSPUCTAgent",
+AGENTS: Dict[str, Dict[str, Any]] = {
+    "Neural_Transformer": {
+        "class_path": "neural.trans_mlp.neural_ismcts:NeuralISMCTSPUCTAgent",
+        "kind": "neural",
+        "checkpoint_path": "artifacts/training_trans/best.pt",
+    },
+    "PUCT": {
+        "class_path": "liars_dice.agents.ismcts_2_puct:ISMCTSPUCTAgent",
+        "kind": "standard",
+    },
+    "History": {
+        "class_path": "liars_dice.agents.ismcts_3_history:ISMCTSHistoryAgent",
+        "kind": "standard",
+    },
 }
 
 
 # =====================
 # WORKER-LOCAL CACHE
 # =====================
-_worker_neural_bundle = None
+_WORKER_CACHE: Dict[str, Any] = {}
 
 
 # =====================
-# LOADERS
+# HELPERS
 # =====================
 def _load_class(path: str):
     module_name, class_name = path.split(":")
@@ -46,21 +54,26 @@ def _load_class(path: str):
     return getattr(mod, class_name)
 
 
-def init_worker_neural(checkpoint_path: str):
-    global _worker_neural_bundle
+def _looks_like_sequence_checkpoint(payload: Dict[str, Any]) -> bool:
+    encoder_cfg = payload.get("encoder_config", {})
+    model_cfg = payload.get("model_config", {})
+    return ("max_bids" in encoder_cfg) or (model_cfg.get("static_dim") is not None)
 
-    from neural.action_mapping import ActionMapper
-    from neural.basic_mlp.encoder import ObservationEncoder
-    from neural.basic_mlp.nn_model import PolicyNetwork
 
+def _load_neural_bundle(checkpoint_path: str) -> Tuple[Any, Any, Any]:
     payload = torch.load(checkpoint_path, map_location="cpu")
 
-    encoder = ObservationEncoder(**payload["encoder_config"])
+    from neural.action_mapping import ActionMapper
+
     mapper = ActionMapper(**payload["action_mapper_config"])
 
-    model_cfg = payload.get("model_config", {})
-    if model_cfg and model_cfg.get("static_dim") is not None:
-        # transformer-style checkpoint
+    if _looks_like_sequence_checkpoint(payload):
+        from neural.trans_mlp.encoder import ObservationEncoder
+        from neural.trans_mlp.nn_model import PolicyNetwork
+
+        encoder = ObservationEncoder(**payload["encoder_config"])
+        model_cfg = payload["model_config"]
+
         model = PolicyNetwork(
             static_dim=model_cfg["static_dim"],
             token_dim=model_cfg["token_dim"],
@@ -69,7 +82,11 @@ def init_worker_neural(checkpoint_path: str):
             d_model=model_cfg["d_model"],
         )
     else:
-        # original flat MLP checkpoint
+        from neural.basic_mlp.encoder import ObservationEncoder
+        from neural.basic_mlp.nn_model import PolicyNetwork
+
+        encoder = ObservationEncoder(**payload["encoder_config"])
+
         model = PolicyNetwork(
             input_dim=encoder.input_dim,
             num_actions=mapper.num_actions,
@@ -80,62 +97,73 @@ def init_worker_neural(checkpoint_path: str):
     model.load_state_dict(payload["model_state_dict"])
     model.eval()
 
-    _worker_neural_bundle = (model, encoder, mapper)
+    return model, encoder, mapper
 
 
-def make_neural_agent(seed: int, sims_per_move: int | None, time_limit_s: float | None):
-    from neural.basic_mlp.neural_ismcts import NeuralISMCTSPUCTAgent
+def _init_worker(agent_spec: Dict[str, Any]) -> None:
+    """
+    Called once per worker process.
+    For neural agents, preload checkpoint/model/encoder/mapper.
+    For standard agents, no extra state is required.
+    """
+    global _WORKER_CACHE
+    _WORKER_CACHE = {"agent_spec": agent_spec}
 
-    model, encoder, mapper = _worker_neural_bundle
-    return NeuralISMCTSPUCTAgent(
-        model=model,
-        encoder=encoder,
-        action_mapper=mapper,
-        seed=seed,
-        sims_per_move=sims_per_move,
-        time_limit_s=time_limit_s,
-    )
-
-
-def load_baseline_agent(
-    path: str, seed: int, sims_per_move: int | None, time_limit_s: float | None
-):
-    Cls = _load_class(path)
-    return Cls(
-        seed=seed,
-        sims_per_move=sims_per_move,
-        time_limit_s=time_limit_s,
-    )
+    if agent_spec["kind"] == "neural":
+        checkpoint_path = agent_spec["checkpoint_path"]
+        model, encoder, mapper = _load_neural_bundle(checkpoint_path)
+        _WORKER_CACHE["neural_bundle"] = (model, encoder, mapper)
 
 
-# =====================
-# SINGLE GAME RUNNERS
-# =====================
-def _run_game(
-    agent_name: str,
-    agent_path: str,
+def _make_agent(
+    agent_spec: Dict[str, Any],
     seed: int,
     sims_per_move: int | None,
     time_limit_s: float | None,
 ):
+    cls = _load_class(agent_spec["class_path"])
+
+    if agent_spec["kind"] == "neural":
+        model, encoder, mapper = _WORKER_CACHE["neural_bundle"]
+        return cls(
+            model=model,
+            encoder=encoder,
+            action_mapper=mapper,
+            seed=seed,
+            sims_per_move=sims_per_move,
+            time_limit_s=time_limit_s,
+        )
+
+    # Standard agents: pass search-budget args if supported.
+    # This assumes your old ISMCTS agents / heuristic agent accept these.
+    return cls(
+        seed=seed,
+        sims_per_move=sims_per_move,
+        time_limit_s=time_limit_s,
+    )
+
+
+# =====================
+# SINGLE GAME RUNNER
+# =====================
+def _run_game(
+    agent_name: str,
+    seed: int,
+    sims_per_move: int | None,
+    time_limit_s: float | None,
+):
+    agent_spec = _WORKER_CACHE["agent_spec"]
     rng = random.Random(seed)
 
     agents = []
     for _ in range(NUM_PLAYERS):
         agent_seed = rng.randint(0, 10**9)
-        if agent_name == "Neural":
-            agent = make_neural_agent(
-                seed=agent_seed,
-                sims_per_move=sims_per_move,
-                time_limit_s=time_limit_s,
-            )
-        else:
-            agent = load_baseline_agent(
-                path=agent_path,
-                seed=agent_seed,
-                sims_per_move=sims_per_move,
-                time_limit_s=time_limit_s,
-            )
+        agent = _make_agent(
+            agent_spec=agent_spec,
+            seed=agent_seed,
+            sims_per_move=sims_per_move,
+            time_limit_s=time_limit_s,
+        )
         agents.append(agent)
 
     game = LiarsDiceGame(
@@ -176,10 +204,9 @@ def _run_game(
 
 
 def run_game_time_limited(args):
-    agent_name, agent_path, seed = args
+    agent_name, seed = args
     return _run_game(
         agent_name=agent_name,
-        agent_path=agent_path,
         seed=seed,
         sims_per_move=None,
         time_limit_s=TIME_LIMIT_S,
@@ -187,10 +214,9 @@ def run_game_time_limited(args):
 
 
 def run_game_sim_limited(args):
-    agent_name, agent_path, seed = args
+    agent_name, seed = args
     return _run_game(
         agent_name=agent_name,
-        agent_path=agent_path,
         seed=seed,
         sims_per_move=SIMS_PER_MOVE,
         time_limit_s=None,
@@ -200,12 +226,14 @@ def run_game_sim_limited(args):
 # =====================
 # BENCHMARKS
 # =====================
-def benchmark_time_limited(agent_name: str, agent_path: str) -> Dict[str, Any]:
-    args = [(agent_name, agent_path, BASE_SEED + i) for i in range(NUM_GAMES)]
+def benchmark_time_limited(
+    agent_name: str, agent_spec: Dict[str, Any]
+) -> Dict[str, Any]:
+    args = [(agent_name, BASE_SEED + i) for i in range(NUM_GAMES)]
 
     with Pool(
-        initializer=init_worker_neural if agent_name == "Neural" else None,
-        initargs=(CHECKPOINT_PATH,) if agent_name == "Neural" else (),
+        initializer=_init_worker,
+        initargs=(agent_spec,),
     ) as pool:
         results = list(
             tqdm(
@@ -237,12 +265,14 @@ def benchmark_time_limited(agent_name: str, agent_path: str) -> Dict[str, Any]:
     }
 
 
-def benchmark_sim_limited(agent_name: str, agent_path: str) -> Dict[str, Any]:
-    args = [(agent_name, agent_path, BASE_SEED + 100_000 + i) for i in range(NUM_GAMES)]
+def benchmark_sim_limited(
+    agent_name: str, agent_spec: Dict[str, Any]
+) -> Dict[str, Any]:
+    args = [(agent_name, BASE_SEED + 100_000 + i) for i in range(NUM_GAMES)]
 
     with Pool(
-        initializer=init_worker_neural if agent_name == "Neural" else None,
-        initargs=(CHECKPOINT_PATH,) if agent_name == "Neural" else (),
+        initializer=_init_worker,
+        initargs=(agent_spec,),
     ) as pool:
         results = list(
             tqdm(
@@ -284,22 +314,22 @@ if __name__ == "__main__":
     sim_results: List[Dict[str, Any]] = []
 
     print("\n=== TIME-LIMITED: simulations per second ===")
-    for agent_name, agent_path in AGENTS.items():
-        result = benchmark_time_limited(agent_name, agent_path)
+    for agent_name, agent_spec in AGENTS.items():
+        result = benchmark_time_limited(agent_name, agent_spec)
         time_results.append(result)
         print(
-            f"{result['agent']:8s} | "
+            f"{result['agent']:18s} | "
             f"{result['simulations_per_second']:.2f} sims/sec | "
             f"{result['avg_ms_per_move']:.2f} ms/move | "
             f"{result['avg_sims_per_move']:.2f} sims/move"
         )
 
     print("\n=== SIM-LIMITED: time per simulation ===")
-    for agent_name, agent_path in AGENTS.items():
-        result = benchmark_sim_limited(agent_name, agent_path)
+    for agent_name, agent_spec in AGENTS.items():
+        result = benchmark_sim_limited(agent_name, agent_spec)
         sim_results.append(result)
         print(
-            f"{result['agent']:8s} | "
+            f"{result['agent']:18s} | "
             f"{result['time_per_sim_ms']:.4f} ms/sim | "
             f"{result['avg_ms_per_move']:.2f} ms/move | "
             f"{result['avg_sims_per_move']:.2f} sims/move"

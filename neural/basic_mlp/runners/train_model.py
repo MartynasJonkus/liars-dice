@@ -17,11 +17,11 @@ from neural.basic_mlp.training_pipeline import save_model_checkpoint
 # =====================
 # CONFIG (EDIT HERE)
 # =====================
-DATA_PATH = "artifacts/supervised_data/supervised_samples.jsonl"
-CHECKPOINT_DIR = "artifacts/policy_training"
+DATA_PATH = "artifacts/data_basic/supervised_samples.jsonl"
+CHECKPOINT_DIR = "artifacts/training_basic"
 
 BATCH_SIZE = 256
-EPOCHS = 100
+EPOCHS = 30
 LR = 1e-3
 WEIGHT_DECAY = 1e-4
 

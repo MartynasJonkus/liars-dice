@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple, Type
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -43,7 +43,7 @@ def policy_cross_entropy_loss(
     target_policy: torch.Tensor,
 ) -> torch.Tensor:
     """
-    Cross-entropy with a soft target distribution (AlphaZero-style policy target).
+    Cross-entropy against a soft target distribution.
     """
     log_probs = torch.log_softmax(logits, dim=-1)
     return -(target_policy * log_probs).sum(dim=-1).mean()
@@ -61,56 +61,6 @@ def build_dataloader(
         shuffle=shuffle,
         num_workers=0,
     )
-
-
-def train_policy_network(
-    model: torch.nn.Module,
-    samples: List[PolicySample],
-    config: TrainingConfig,
-) -> Dict[str, List[float]]:
-    if not samples:
-        raise ValueError("Cannot train on an empty sample list")
-
-    loader = build_dataloader(
-        samples=samples,
-        batch_size=config.batch_size,
-        shuffle=True,
-    )
-
-    model.to(config.device)
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=config.learning_rate,
-        weight_decay=config.weight_decay,
-    )
-
-    history: Dict[str, List[float]] = {"loss": []}
-
-    model.train()
-    for epoch in range(config.epochs):
-        running_loss = 0.0
-        batch_count = 0
-
-        for static_x, bid_history, bid_mask, target_policy in loader:
-            static_x = static_x.to(config.device)
-            bid_history = bid_history.to(config.device)
-            bid_mask = bid_mask.to(config.device)
-            target_policy = target_policy.to(config.device)
-
-            logits = model(static_x, bid_history, bid_mask)
-            loss = policy_cross_entropy_loss(logits, target_policy)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            running_loss += float(loss.item())
-            batch_count += 1
-
-        epoch_loss = running_loss / max(1, batch_count)
-        history["loss"].append(epoch_loss)
-
-    return history
 
 
 @torch.no_grad()
@@ -146,8 +96,114 @@ def evaluate_policy_network(
         total_loss += float(loss.item())
         batch_count += 1
 
-    model.train()
     return total_loss / max(1, batch_count)
+
+
+def train_policy_network(
+    model: torch.nn.Module,
+    train_samples: List[PolicySample],
+    config: TrainingConfig,
+    val_samples: Optional[List[PolicySample]] = None,
+    encoder: Optional[ObservationEncoder] = None,
+    action_mapper: Optional[ActionMapper] = None,
+    best_checkpoint_path: Optional[str | Path] = None,
+    last_checkpoint_path: Optional[str | Path] = None,
+) -> Dict[str, List[float]]:
+    """
+    Trains the model and optionally:
+    - evaluates on validation every epoch
+    - saves best checkpoint by validation loss
+    - saves last checkpoint after final epoch
+    """
+    if not train_samples:
+        raise ValueError("Cannot train on an empty training sample list")
+
+    train_loader = build_dataloader(
+        samples=train_samples,
+        batch_size=config.batch_size,
+        shuffle=True,
+    )
+
+    model.to(config.device)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=config.learning_rate,
+        weight_decay=config.weight_decay,
+    )
+
+    history: Dict[str, List[float]] = {
+        "train_loss": [],
+        "val_loss": [],
+    }
+
+    best_val_loss = float("inf")
+    has_validation = val_samples is not None and len(val_samples) > 0
+
+    for epoch in range(config.epochs):
+        model.train()
+
+        running_loss = 0.0
+        batch_count = 0
+
+        for static_x, bid_history, bid_mask, target_policy in train_loader:
+            static_x = static_x.to(config.device)
+            bid_history = bid_history.to(config.device)
+            bid_mask = bid_mask.to(config.device)
+            target_policy = target_policy.to(config.device)
+
+            logits = model(static_x, bid_history, bid_mask)
+            loss = policy_cross_entropy_loss(logits, target_policy)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            running_loss += float(loss.item())
+            batch_count += 1
+
+        train_loss = running_loss / max(1, batch_count)
+        history["train_loss"].append(train_loss)
+
+        if has_validation:
+            val_loss = evaluate_policy_network(
+                model=model,
+                samples=val_samples,
+                config=config,
+            )
+            history["val_loss"].append(val_loss)
+            print(
+                f"Epoch {epoch + 1:03d} | train={train_loss:.4f} | val={val_loss:.4f}"
+            )
+
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                if best_checkpoint_path is not None:
+                    if encoder is None or action_mapper is None:
+                        raise ValueError(
+                            "encoder and action_mapper are required to save checkpoints"
+                        )
+                    save_model_checkpoint(
+                        model=model,
+                        encoder=encoder,
+                        action_mapper=action_mapper,
+                        path=best_checkpoint_path,
+                    )
+        else:
+            print(f"Epoch {epoch + 1:03d} | train={train_loss:.4f}")
+
+    if last_checkpoint_path is not None:
+        if encoder is None or action_mapper is None:
+            raise ValueError(
+                "encoder and action_mapper are required to save checkpoints"
+            )
+        save_model_checkpoint(
+            model=model,
+            encoder=encoder,
+            action_mapper=action_mapper,
+            path=last_checkpoint_path,
+        )
+
+    return history
 
 
 def save_model_checkpoint(
@@ -184,15 +240,11 @@ def save_model_checkpoint(
 
 def load_model_checkpoint(
     path: str | Path,
-    model_cls,
+    model_cls: Type[torch.nn.Module],
     device: str = "cpu",
 ):
     """
-    Reconstructs model + encoder + action mapper from a checkpoint.
-
-    model_cls is expected to accept:
-      static_dim, token_dim, num_actions, max_bids, d_model
-    plus whatever defaults are present in the class.
+    Reconstruct model + encoder + action_mapper from checkpoint.
     """
     from neural.action_mapping import ActionMapper
     from neural.trans_mlp.encoder import ObservationEncoder

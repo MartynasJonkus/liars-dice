@@ -16,9 +16,9 @@ from neural.basic_mlp.data_collection import (
 )
 from neural.basic_mlp.encoder import ObservationEncoder
 
-NUM_GAMES = 200
+NUM_GAMES = 1000
 WORKERS = max(1, (os.cpu_count() or 2) - 1)
-OUTPUT_DIR = "artifacts/supervised_data"
+OUTPUT_DIR = "artifacts/data_basic"
 MERGED_NAME = "supervised_samples.jsonl"
 BASE_SEED = 12345
 

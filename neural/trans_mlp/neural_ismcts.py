@@ -96,7 +96,7 @@ class NeuralISMCTSPUCTAgent:
         self,
         game: LiarsDiceGame,
         obs: Observation,
-    ) -> Tuple[Action, Dict[Action, float]]:
+    ) -> Tuple[Action, Dict[Action, float], int]:
         def is_liar(a: Action) -> bool:
             return isinstance(a, tuple) and a[0] == "liar"
 
@@ -245,7 +245,7 @@ class NeuralISMCTSPUCTAgent:
             q_a = 0.0 if e is None else e.mean_value
 
             u = q_a + self.puct_c * prior * (sqrt_N / (1.0 + n_a))
-            u += 1e-12 * self.rng.random()  # tie-break
+            u += 1e-12 * self.rng.random()
 
             if u > best_val:
                 best_val, best = u, a
@@ -255,18 +255,31 @@ class NeuralISMCTSPUCTAgent:
 
         return best
 
+    def _make_prior_cache_key(self, encoded: Dict[str, Any]) -> Any:
+        static_key = tuple(encoded["static_features"])
+        history_key = tuple(tuple(token) for token in encoded["bid_history"])
+        mask_key = tuple(encoded["bid_mask"])
+        return (static_key, history_key, mask_key)
+
     @torch.inference_mode()
     def _compute_priors_from_obs_inplace(
         self,
         node: Node,
         obs: Observation,
         legal_actions: List[Action],
+        prior_cache: Dict[Any, Dict[Action, float]],
     ) -> None:
         if not legal_actions:
             node.priors = {}
             return
 
         encoded = self.encoder.encode(obs)
+        cache_key = self._make_prior_cache_key(encoded)
+
+        cached = prior_cache.get(cache_key)
+        if cached is not None:
+            node.priors = {a: cached[a] for a in legal_actions if a in cached}
+            return
 
         static_x = torch.tensor(
             encoded["static_features"],
@@ -312,7 +325,6 @@ class NeuralISMCTSPUCTAgent:
             idx = self.action_mapper.action_to_index(action)
             priors[action] = max(self.prior_floor, float(probs[idx].item()))
 
-        # Renormalize after prior floor
         total = sum(priors.values())
         if total <= 0.0:
             u = 1.0 / len(legal_actions)
@@ -323,6 +335,7 @@ class NeuralISMCTSPUCTAgent:
             for action in list(priors.keys()):
                 priors[action] *= inv_total
 
+        prior_cache[cache_key] = dict(priors)
         node.priors = priors
 
     def _root_visit_distribution(

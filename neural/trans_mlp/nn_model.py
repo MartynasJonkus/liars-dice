@@ -72,19 +72,16 @@ class PolicyNetwork(nn.Module):
         bid_history: torch.Tensor,
         bid_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """
-        Args:
-            static_x:    [B, static_dim]
-            bid_history: [B, max_bids, token_dim]
-            bid_mask:    [B, max_bids], True = padded token
-
-        Returns:
-            logits: [B, num_actions]
-        """
         static_repr = self.static_net(static_x)
 
         bid_enc = self.bid_embed(bid_history)
         bid_enc = bid_enc + self.pos_embedding[:, : bid_enc.size(1), :]
+
+        if bid_mask is not None:
+            all_masked = bid_mask.all(dim=1)
+            if all_masked.any():
+                bid_mask = bid_mask.clone()
+                bid_mask[all_masked, 0] = False
 
         bid_enc = self.bid_transformer(
             bid_enc,
