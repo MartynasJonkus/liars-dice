@@ -15,13 +15,13 @@ from liars_dice.core.game import LiarsDiceGame
 # =====================
 # CONFIG
 # =====================
-NUM_GAMES_PER_CONFIG = 100
+NUM_GAMES_PER_CONFIG = 1000
 NUM_PLAYERS = 4
 DICE_PER_PLAYER = 5
 BASE_SEED = 12345
 
 SIMS_PER_MOVE = None
-TIME_LIMIT_S = 0.2  # e.g. 0.2 for time-limited, else None
+TIME_LIMIT_S = 0.2
 
 OUTPUT_GAMES_CSV = "pre_self_play_games.csv"
 OUTPUT_SUMMARY_CSV = "pre_self_play_summary.csv"
