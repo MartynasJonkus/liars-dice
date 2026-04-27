@@ -32,7 +32,12 @@ AGENTS: Dict[str, Dict[str, Any]] = {
         "kind": "neural",
         "checkpoint_path": "artifacts/training_basic/best.pt",
     },
-    "Neural_Transformer": {
+    "Neural_MLP_SELF": {
+        "class_path": "neural.basic_mlp.neural_ismcts:NeuralISMCTSPUCTAgent",
+        "kind": "neural",
+        "checkpoint_path": "artifacts/self_play_mlp/best.pt",
+    },
+    "Neural_MLP_Trans": {
         "class_path": "neural.trans_mlp.neural_ismcts:NeuralISMCTSPUCTAgent",
         "kind": "neural",
         "checkpoint_path": "artifacts/training_trans/best.pt",
@@ -45,10 +50,10 @@ AGENTS: Dict[str, Dict[str, Any]] = {
         "class_path": "liars_dice.agents.ismcts_3_history:ISMCTSHistoryAgent",
         "kind": "standard",
     },
-    "Heuristic": {
-        "class_path": "liars_dice.agents.baseline_heuristic:HeuristicAgent",
-        "kind": "standard",
-    },
+    # "Heuristic": {
+    #     "class_path": "liars_dice.agents.baseline_heuristic:HeuristicAgent",
+    #     "kind": "standard",
+    # },
 }
 
 
