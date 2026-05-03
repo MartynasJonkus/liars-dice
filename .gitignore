@@ -35,3 +35,4 @@ Thumbs.db
 artifacts/eval
 artifacts/data*
 artifacts/benchmark_results
+sweep_results/

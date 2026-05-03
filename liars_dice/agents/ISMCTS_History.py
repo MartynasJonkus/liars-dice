@@ -33,10 +33,10 @@ class Node:
     visit_count: int = 0
 
 
-class ISMCTSPUCTAgent:
+class ISMCTSHistoryAgent:
     def __init__(
         self,
-        label: str = "ISMCTS-PUCT",
+        label: str = "ISMCTS-History",
         sims_per_move: int | None = 500,
         time_limit_s: float | None = None,
         seed: Optional[int] = None,
@@ -44,9 +44,11 @@ class ISMCTSPUCTAgent:
         prior_tau: float = 1.0,
         liar_exp: float = 0.5,
         prior_floor: float = 1e-6,
-        rollout_theta: float = 0.40,
-        rollout_alpha: float = 0.70,
-        rollout_eps: float = 0.15,
+        hist_beta: float = 1.0,
+        # hist_gamma: float = 0.0,
+        rollout_theta: float = 0.30,
+        rollout_alpha: float = 0.60,
+        rollout_eps: float = 0.2,
         rollout_max_steps: int = 40,
     ):
         self.name = label
@@ -59,6 +61,9 @@ class ISMCTSPUCTAgent:
         self.prior_tau = prior_tau
         self.liar_exp = liar_exp
         self.prior_floor = prior_floor
+
+        self.hist_beta = hist_beta
+        # self.hist_gamma = hist_gamma
 
         self.rollout_theta = rollout_theta
         self.rollout_alpha = rollout_alpha
@@ -181,15 +186,58 @@ class ISMCTSPUCTAgent:
             len(obs.public.history),
         )
 
-    def _determinize_from_game(
-        self, game: LiarsDiceGame, obs: Observation
-    ) -> LiarsDiceGame:
+    def weighted_sample(self, probs):
+        r = self.rng.random()
+        acc = 0
+        for f, p in enumerate(probs, start=1):
+            acc += p
+            if r <= acc:
+                return f
+        return 6
+
+    def _determinize_from_game(self, game, obs):
         g = game.clone_for_determinization()
+
+        hist = []
+        for event in reversed(g._history):
+            if isinstance(event, tuple) and event[0] == "showdown":
+                break
+            hist.append(event)
+        hist.reverse()
+
+        face_freq = {pid: [0] * 7 for pid in range(g.num_players)}
+        qty_max = {pid: 1 for pid in range(g.num_players)}
+
+        for pid, kind, data in hist:
+            if kind == "bid":
+                q, f = data
+                face_freq[pid][f] += 1
+                qty_max[pid] = max(qty_max[pid], q)
+
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue
-            n = g._dice_left[pid]
-            g._dice[pid] = [self.rng.randint(1, 6) for _ in range(n)]
+
+            dice_cnt = g._dice_left[pid]
+            hf = face_freq[pid]
+            total_bids = sum(hf)
+
+            base = [1 / 6] * 7
+
+            probs = []
+            for face in range(1, 7):
+                freq = (hf[face] / total_bids) if total_bids > 0 else 0
+                p = base[face] * (1 + self.hist_beta * freq)
+                probs.append(p)
+
+            # scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
+            # probs = [p * scale for p in probs]
+
+            Z = sum(probs)
+            probs = [p / Z for p in probs]
+
+            g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
+
         return g
 
     def _select_puct_over_all(self, node: Node) -> Action:

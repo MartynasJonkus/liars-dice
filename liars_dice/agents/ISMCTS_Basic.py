@@ -19,7 +19,7 @@ class EdgeStats:
     value_sum: float = 0.0
 
     @property
-    def mean_value(self) -> float:
+    def avg_value(self) -> float:
         return 0.0 if self.visit_count == 0 else self.value_sum / self.visit_count
 
 
@@ -27,43 +27,31 @@ class EdgeStats:
 class Node:
     key: NodeKey
     player: int
+    untried: List[Action]
     children: Dict[Action, "Node"] = field(default_factory=dict)
     edges: Dict[Action, EdgeStats] = field(default_factory=dict)
-    priors: Dict[Action, float] = field(default_factory=dict)
     visit_count: int = 0
 
 
-class ISMCTSHistoryAgent:
+class ISMCTSHeuristicAgent:
     def __init__(
         self,
-        label: str = "ISMCTS-History",
+        label: str = "ISMCTS-Heuristic",
         sims_per_move: int | None = 500,
         time_limit_s: float | None = None,
+        uct_c: float = 1.5,
         seed: Optional[int] = None,
-        puct_c: float = 1.5,
-        prior_tau: float = 1.0,
-        liar_exp: float = 0.5,
-        prior_floor: float = 1e-6,
-        hist_beta: float = 1.0,
-        hist_gamma: float = 0.0,
-        rollout_theta: float = 0.40,
-        rollout_alpha: float = 0.70,
-        rollout_eps: float = 0.15,
+        rollout_theta: float = 0.30,
+        rollout_alpha: float = 0.60,
+        rollout_eps: float = 0.2,
         rollout_max_steps: int = 40,
     ):
         self.name = label
         self.sims_per_move = sims_per_move
         self.time_limit_s = time_limit_s
         self._last_sim_count = 0
-        self.puct_c = puct_c
+        self.uct_c = uct_c
         self.rng = random.Random(seed)
-
-        self.prior_tau = prior_tau
-        self.liar_exp = liar_exp
-        self.prior_floor = prior_floor
-
-        self.hist_beta = hist_beta
-        self.hist_gamma = hist_gamma
 
         self.rollout_theta = rollout_theta
         self.rollout_alpha = rollout_alpha
@@ -76,10 +64,9 @@ class ISMCTSHistoryAgent:
 
         root_player = obs.private.my_player
         root_key = self._node_key_from_obs(obs)
-
+        root_actions = list(game.legal_actions())
         root = Node(
-            key=root_key,
-            player=obs.public.current_player,
+            key=root_key, player=obs.public.current_player, untried=list(root_actions)
         )
 
         start_time = time.perf_counter()
@@ -89,47 +76,60 @@ class ISMCTSHistoryAgent:
             g_det = self._determinize_from_game(game, obs)
 
             node = root
-            self._compute_priors_inplace(node, g_det)
-
             path: List[Tuple[Node, Action]] = []
             terminated_in_tree = False
 
             while True:
-                if not node.priors:
+                if node.untried:
+                    a = self.rng.choice(node.untried)
+                    node.untried.remove(a)
+
+                    if is_liar(a):
+                        before = list(g_det._dice_left)
+                        g_det.step(a)
+                        after = g_det._dice_left
+                        root_lost = after[root_player] < before[root_player]
+                        reward = 0.0 if root_lost else 1.0
+
+                        path.append((node, a))
+                        self._backup(path, reward)
+                        terminated_in_tree = True
+                        break
+
+                    g_det.step(a)
+                    child_obs = g_det.observe(g_det._current)
+                    child_key = self._node_key_from_obs(child_obs)
+                    child_untried = list(g_det.legal_actions())
+                    child = Node(
+                        key=child_key,
+                        player=child_obs.public.current_player,
+                        untried=child_untried,
+                    )
+
+                    node.children[a] = child
+                    node.edges.setdefault(a, EdgeStats())
+                    path.append((node, a))
+                    node = child
                     break
 
-                a = self._select_puct_over_all(node)
+                if not node.children:
+                    break
+
+                a = self._select_uct(node, list(node.children.keys()))
 
                 if is_liar(a):
                     before = list(g_det._dice_left)
-                    g_det.step(a)
                     after = g_det._dice_left
                     root_lost = after[root_player] < before[root_player]
                     reward = 0.0 if root_lost else 1.0
 
-                    node.edges.setdefault(a, EdgeStats())
                     path.append((node, a))
                     self._backup(path, reward)
                     terminated_in_tree = True
                     break
 
                 g_det.step(a)
-
-                if a not in node.children:
-                    child_obs = g_det.observe(g_det._current)
-                    child_key = self._node_key_from_obs(child_obs)
-                    child = Node(key=child_key, player=child_obs.public.current_player)
-                    node.children[a] = child
-                    node.edges.setdefault(a, EdgeStats())
-                    path.append((node, a))
-                    node = child
-                    self._compute_priors_inplace(node, g_det)
-                    break
-                else:
-                    node.edges.setdefault(a, EdgeStats())
-                    path.append((node, a))
-                    node = node.children[a]
-                    self._compute_priors_inplace(node, g_det)
+                node = node.children[a]
 
             sim_count += 1
 
@@ -186,114 +186,33 @@ class ISMCTSHistoryAgent:
             len(obs.public.history),
         )
 
-    def weighted_sample(self, probs):
-        r = self.rng.random()
-        acc = 0
-        for f, p in enumerate(probs, start=1):
-            acc += p
-            if r <= acc:
-                return f
-        return 6
-
-    def _determinize_from_game(self, game, obs):
+    def _determinize_from_game(
+        self, game: LiarsDiceGame, obs: Observation
+    ) -> LiarsDiceGame:
         g = game.clone_for_determinization()
-
-        hist = []
-        for event in reversed(g._history):
-            if isinstance(event, tuple) and event[0] == "showdown":
-                break
-            hist.append(event)
-        hist.reverse()
-
-        face_freq = {pid: [0] * 7 for pid in range(g.num_players)}
-        qty_max = {pid: 1 for pid in range(g.num_players)}
-
-        for pid, kind, data in hist:
-            if kind == "bid":
-                q, f = data
-                face_freq[pid][f] += 1
-                qty_max[pid] = max(qty_max[pid], q)
-
         for pid in range(g.num_players):
             if pid == obs.private.my_player:
                 continue
-
-            dice_cnt = g._dice_left[pid]
-            hf = face_freq[pid]
-            total_bids = sum(hf)
-
-            base = [1 / 6] * 7
-
-            probs = []
-            for face in range(1, 7):
-                freq = (hf[face] / total_bids) if total_bids > 0 else 0
-                p = base[face] * (1 + self.hist_beta * freq)
-                probs.append(p)
-
-            scale = 1 + self.hist_gamma * (qty_max[pid] / sum(g._dice_left))
-            probs = [p * scale for p in probs]
-
-            Z = sum(probs)
-            probs = [p / Z for p in probs]
-
-            g._dice[pid] = [self.weighted_sample(probs) for _ in range(dice_cnt)]
-
+            n = g._dice_left[pid]
+            g._dice[pid] = [self.rng.randint(1, 6) for _ in range(n)]
         return g
 
-    def _select_puct_over_all(self, node: Node) -> Action:
-        sqrt_N = math.sqrt(max(1, node.visit_count))
-        best, best_val = None, -1e18
-        for a, prior in node.priors.items():
-            e = node.edges.get(a)
-            n_a = 0 if e is None else e.visit_count
-            q_a = 0.0 if e is None else e.mean_value
-            u = q_a + self.puct_c * prior * (sqrt_N / (1.0 + n_a))
-            u += 1e-12 * self.rng.random()
-            if u > best_val:
-                best_val, best = u, a
+    def _select_uct(self, node: Node, legal_children: List[Action]) -> Action:
+        logN = math.log(max(1, node.visit_count))
+        best, best_val = None, -1e9
+        for action in legal_children:
+            edge = node.edges[action]
+            uct = edge.avg_value + self.uct_c * math.sqrt(logN / (edge.visit_count + 1))
+            if uct > best_val:
+                best_val, best = uct, action
         return best
-
-    def _compute_priors_inplace(self, node: Node, g_det: LiarsDiceGame) -> None:
-        legal = list(g_det.legal_actions())
-        priors: Dict[Action, float] = {}
-
-        actor = node.player
-        for a in legal:
-            if isinstance(a, tuple) and a[0] == "bid":
-                q, f = a[1]
-                S = bid_support_for_actor(g_det, actor, (q, f))
-                base = max(self.prior_floor, S ** (1.0 / max(1e-6, self.prior_tau)))
-                priors[a] = base
-
-        if any(isinstance(x, tuple) and x[0] == "liar" for x in legal):
-            last_bid = g_det._last_bid
-            if last_bid is not None:
-                S_last = bid_support_for_actor(g_det, actor, last_bid)
-                p_liar = max(
-                    self.prior_floor, (1.0 - S_last) ** max(1e-6, self.liar_exp)
-                )
-            else:
-                p_liar = self.prior_floor
-            priors[("liar", None)] = p_liar
-
-        s = sum(priors.values())
-        if s <= 0.0:
-            u = 1.0 / max(1, len(legal))
-            for a in legal:
-                priors[a] = u
-        else:
-            inv = 1.0 / s
-            for a in list(priors.keys()):
-                priors[a] *= inv
-
-        node.priors = priors
 
     def _backup(self, path: List[Tuple[Node, Action]], reward: float) -> None:
         for node, action in path:
             node.visit_count += 1
-            e = node.edges.setdefault(action, EdgeStats())
-            e.visit_count += 1
-            e.value_sum += reward
+            edge = node.edges.setdefault(action, EdgeStats())
+            edge.visit_count += 1
+            edge.value_sum += reward
 
     def _rollout_to_showdown(self, game: LiarsDiceGame, root_player: int) -> float:
         if game.num_alive() <= 1:
