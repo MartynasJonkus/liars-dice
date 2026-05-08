@@ -12,10 +12,10 @@ import torch
 from tqdm import tqdm
 
 from liars_dice.core.game import LiarsDiceGame
-from neural.action_mapping import ActionMapper
-from neural.basic_mlp.encoder import ObservationEncoder
-from neural.basic_mlp.neural_ismcts import NeuralISMCTSPUCTAgent
-from neural.basic_mlp.nn_model import PolicyNetwork
+from neural.common.action_mapping import ActionMapper
+from neural.basic_mlp.encoder_mlp import ObservationEncoder
+from neural.basic_mlp.neural_ismcts_mlp import NeuralISMCTSPUCTAgent
+from neural.basic_mlp.model_mlp import PolicyNetwork
 from neural.basic_mlp.training_pipeline import save_model_checkpoint
 
 # =====================

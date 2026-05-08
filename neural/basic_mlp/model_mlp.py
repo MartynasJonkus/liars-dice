@@ -5,8 +5,6 @@ from torch import nn
 
 
 class PolicyNetwork(nn.Module):
-    """Simple MLP policy network for observation -> action logits."""
-
     def __init__(
         self,
         input_dim: int,

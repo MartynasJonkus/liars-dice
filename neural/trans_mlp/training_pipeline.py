@@ -7,9 +7,9 @@ from typing import Dict, List, Optional, Tuple, Type
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from neural.action_mapping import ActionMapper
-from neural.trans_mlp.data_collection import PolicySample
-from neural.trans_mlp.encoder import ObservationEncoder
+from neural.common.action_mapping import ActionMapper
+from neural.trans_mlp.data_collection_trans import PolicySample
+from neural.trans_mlp.encoder_trans import ObservationEncoder
 
 
 class PolicyDataset(Dataset):
@@ -246,8 +246,8 @@ def load_model_checkpoint(
     """
     Reconstruct model + encoder + action_mapper from checkpoint.
     """
-    from neural.action_mapping import ActionMapper
-    from neural.trans_mlp.encoder import ObservationEncoder
+    from neural.common.action_mapping import ActionMapper
+    from neural.trans_mlp.encoder_trans import ObservationEncoder
 
     path = Path(path)
     payload = torch.load(path, map_location=device)

@@ -1,23 +1,12 @@
 from __future__ import annotations
 
-import json
-import random
-from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
-from liars_dice.agents.ismcts_3_history import ISMCTSHistoryAgent
+from liars_dice.agents.ISMCTS_History import ISMCTSHistoryAgent
 from liars_dice.core.game import LiarsDiceGame, Observation
-from neural.action_mapping import ActionMapper
-from neural.basic_mlp.encoder import ObservationEncoder
+from neural.common.action_mapping import ActionMapper
 
 Action = Tuple[str, Any]
-
-
-@dataclass
-class PolicySample:
-    features: List[float]
-    target_policy: List[float]
 
 
 class VisitTracingHistoryAgent(ISMCTSHistoryAgent):
@@ -42,23 +31,14 @@ class VisitTracingHistoryAgent(ISMCTSHistoryAgent):
         def is_liar(a: Action) -> bool:
             return isinstance(a, tuple) and a[0] == "liar"
 
-        root_player = obs.private.my_player
-        root_key = self._node_key_from_obs(obs)
-        root = type("NodeShim", (), {})()
-        root.key = root_key
-        root.player = obs.public.current_player
-        root.children = {}
-        root.edges = {}
-        root.priors = {}
-        root.visit_count = 0
-
-        # The parent code is not easily reusable without exposing internals. To avoid modifying the original
-        # source file, import the dataclass definitions dynamically from the module object at runtime.
         import importlib
 
         mod = importlib.import_module(self.__class__.__mro__[1].__module__)
         Node = getattr(mod, "Node")
         EdgeStats = getattr(mod, "EdgeStats")
+
+        root_player = obs.private.my_player
+        root_key = self._node_key_from_obs(obs)
         root = Node(key=root_key, player=obs.public.current_player)
 
         for _ in range(self.sims_per_move):
@@ -128,61 +108,3 @@ class VisitTracingHistoryAgent(ISMCTSHistoryAgent):
         if legal_now:
             return self.rng.choice(legal_now), policy
         return ("liar", None), policy
-
-
-class SupervisedSelfPlayCollector:
-    def __init__(
-        self,
-        teacher: VisitTracingHistoryAgent,
-        encoder: ObservationEncoder,
-        action_mapper: ActionMapper,
-        num_players: int = 4,
-        dice_per_player: int = 5,
-        seed: Optional[int] = None,
-    ):
-        self.teacher = teacher
-        self.encoder = encoder
-        self.action_mapper = action_mapper
-        self.num_players = num_players
-        self.dice_per_player = dice_per_player
-        self.rng = random.Random(seed)
-
-    def collect_games(self, num_games: int) -> List[PolicySample]:
-        samples: List[PolicySample] = []
-        for game_idx in range(num_games):
-            game = LiarsDiceGame(
-                num_players=self.num_players,
-                dice_per_player=self.dice_per_player,
-                seed=self.rng.randint(0, 10**9),
-            )
-
-            while True:
-                if game.num_alive() <= 1:
-                    break
-
-                actor = game._current
-                obs = game.observe(actor)
-                features = self.encoder.encode(obs)
-                action = self.teacher.select_action(game, obs)
-                target_policy = self.teacher.last_root_policy
-                if target_policy is None:
-                    raise RuntimeError("Teacher did not expose root visit distribution")
-
-                samples.append(
-                    PolicySample(features=features, target_policy=target_policy)
-                )
-                info = game.step(action)
-                if info.get("terminal"):
-                    break
-        return samples
-
-    def save_samples_jsonl(self, samples: List[PolicySample], path: str | Path) -> None:
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8") as f:
-            for sample in samples:
-                record = {
-                    "features": sample.features,
-                    "target_policy": sample.target_policy,
-                }
-                f.write(json.dumps(record) + "\n")

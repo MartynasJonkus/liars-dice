@@ -32,7 +32,7 @@ OPPONENT_AGENT_SPEC = "liars_dice.agents.ISMCTS_PUCT:ISMCTSPUCTAgent"
 
 # Sweep the history-determinization face-frequency strength.
 SWEEP_PARAMETER_NAME = "hist_beta"
-SWEEP_PARAMETER_VALUES = [0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+SWEEP_PARAMETER_VALUES = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]
 
 GAMES_PER_VALUE = 200
 

@@ -7,10 +7,10 @@ from typing import List, Tuple
 
 import torch
 
-from neural.action_mapping import ActionMapper
-from neural.trans_mlp.data_collection import PolicySample
-from neural.trans_mlp.encoder import ObservationEncoder
-from neural.trans_mlp.nn_model import PolicyNetwork
+from neural.common.action_mapping import ActionMapper
+from neural.trans_mlp.data_collection_trans import PolicySample
+from neural.trans_mlp.encoder_trans import ObservationEncoder
+from neural.trans_mlp.model_trans import PolicyNetwork
 from neural.trans_mlp.training_pipeline import TrainingConfig, train_policy_network
 
 # =====================

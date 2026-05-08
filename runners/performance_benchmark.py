@@ -81,13 +81,13 @@ def _looks_like_sequence_checkpoint(payload: Dict[str, Any]) -> bool:
 def _load_neural_bundle(checkpoint_path: str) -> Tuple[Any, Any, Any]:
     payload = torch.load(checkpoint_path, map_location="cpu")
 
-    from neural.action_mapping import ActionMapper
+    from neural.common.action_mapping import ActionMapper
 
     mapper = ActionMapper(**payload["action_mapper_config"])
 
     if _looks_like_sequence_checkpoint(payload):
-        from neural.trans_mlp.encoder import ObservationEncoder
-        from neural.trans_mlp.nn_model import PolicyNetwork
+        from neural.trans_mlp.encoder_trans import ObservationEncoder
+        from neural.trans_mlp.model_trans import PolicyNetwork
 
         encoder = ObservationEncoder(**payload["encoder_config"])
         model_cfg = payload["model_config"]
@@ -100,8 +100,8 @@ def _load_neural_bundle(checkpoint_path: str) -> Tuple[Any, Any, Any]:
             d_model=model_cfg["d_model"],
         )
     else:
-        from neural.basic_mlp.encoder import ObservationEncoder
-        from neural.basic_mlp.nn_model import PolicyNetwork
+        from neural.basic_mlp.encoder_mlp import ObservationEncoder
+        from neural.basic_mlp.model_mlp import PolicyNetwork
 
         encoder = ObservationEncoder(**payload["encoder_config"])
 

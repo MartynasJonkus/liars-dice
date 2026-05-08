@@ -39,7 +39,7 @@ class ObservationEncoder:
     num_players: int = 4
     max_dice_per_player: int = 5
     max_total_dice: int = 20
-    max_bids: int = 40
+    max_bids: int = 10
 
     @property
     def static_dim(self) -> int:
@@ -161,12 +161,6 @@ class ObservationEncoder:
         self,
         history: Sequence[Tuple[Any, Any, Any]],
     ) -> List[BidEvent]:
-        """
-        Returns only bid events from the current round.
-
-        Scans backward until the most recent showdown marker, then keeps only
-        player bid events after that point.
-        """
         current_round_reversed: List[BidEvent] = []
 
         for event in reversed(history):
@@ -181,7 +175,7 @@ class ObservationEncoder:
                 and isinstance(event[2], tuple)
                 and len(event[2]) == 2
             ):
-                current_round_reversed.append(event)  # type: ignore[arg-type]
+                current_round_reversed.append(event)
 
         current_round_reversed.reverse()
         return current_round_reversed

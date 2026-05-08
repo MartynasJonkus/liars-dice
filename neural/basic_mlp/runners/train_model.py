@@ -8,10 +8,10 @@ from typing import Dict, List, Tuple
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from neural.action_mapping import ActionMapper
-from neural.basic_mlp.data_collection import PolicySample
-from neural.basic_mlp.encoder import ObservationEncoder
-from neural.basic_mlp.nn_model import PolicyNetwork
+from neural.common.action_mapping import ActionMapper
+from neural.basic_mlp.data_collection_mlp import PolicySample
+from neural.basic_mlp.encoder_mlp import ObservationEncoder
+from neural.basic_mlp.model_mlp import PolicyNetwork
 from neural.basic_mlp.training_pipeline import save_model_checkpoint
 
 # =====================

@@ -3,16 +3,16 @@ from __future__ import annotations
 import math
 import random
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
+from torch import nn
 
 from liars_dice.agents.helpers import bid_support_for_actor
 from liars_dice.core.game import Bid, LiarsDiceGame, Observation
-from neural.action_mapping import ActionMapper
-from neural.trans_mlp.encoder import ObservationEncoder
-from neural.trans_mlp.nn_model import PolicyNetwork
+from neural.common.action_mapping import ActionMapper
 
 Action = Tuple[str, Any]
 NodeKey = Tuple[int, Optional[Bid], Tuple[int, ...], int]
@@ -38,21 +38,20 @@ class Node:
     visit_count: int = 0
 
 
-class NeuralISMCTSPUCTAgent:
+class NeuralISMCTSBase(ABC):
     """
-    ISMCTS + PUCT where action priors come from a neural policy network.
+    Abstract base class for neural ISMCTS agents.
 
-    Important design choices:
-    - The network operates on the acting player's observation, not on hidden state.
-    - Root priors are computed once per real move.
-    - Deeper-node priors are recomputed per simulation path, because the same
-      node key may be visited under different histories / determinizations.
+    Subclasses must implement three methods that differ between model variants:
+      - _encode_obs: encodes an Observation into whatever format the model expects
+      - _make_prior_cache_key: builds a hashable cache key from the encoded output
+      - _call_model: runs the model and returns a 1-D logit tensor
     """
 
     def __init__(
         self,
-        model: PolicyNetwork,
-        encoder: ObservationEncoder,
+        model: nn.Module,
+        encoder: Any,
         action_mapper: ActionMapper,
         label: str = "Neural-ISMCTS",
         sims_per_move: int | None = 500,
@@ -87,10 +86,40 @@ class NeuralISMCTSPUCTAgent:
         self.rollout_eps = rollout_eps
         self.rollout_max_steps = rollout_max_steps
 
+    # ------------------------------------------------------------------
+    # Abstract interface
+    # ------------------------------------------------------------------
+
+    @abstractmethod
+    def _encode_obs(self, obs: Observation) -> Any:
+        """Encode an observation into the format expected by _call_model."""
+        ...
+
+    @abstractmethod
+    def _make_prior_cache_key(self, encoded: Any) -> Any:
+        """Return a hashable cache key for the encoded observation."""
+        ...
+
+    @abstractmethod
+    def _call_model(self, encoded: Any) -> torch.Tensor:
+        """Run the policy model and return a 1-D logit tensor (num_actions,)."""
+        ...
+
+    # ------------------------------------------------------------------
+    # Public interface
+    # ------------------------------------------------------------------
+
     def select_action(self, game: LiarsDiceGame, obs: Observation) -> Action:
         action, _, sim_count = self.search_policy(game, obs)
         self._last_sim_count = sim_count
         return action
+
+    def notify_result(self, obs: Observation, info: dict) -> None:
+        return
+
+    # ------------------------------------------------------------------
+    # Search
+    # ------------------------------------------------------------------
 
     def search_policy(
         self,
@@ -194,24 +223,85 @@ class NeuralISMCTSPUCTAgent:
 
         return ("liar", None), {}, sim_count
 
-    def notify_result(self, obs: Observation, info: dict) -> None:
-        return
+    # ------------------------------------------------------------------
+    # Prior computation (shared; delegates to abstract methods)
+    # ------------------------------------------------------------------
+
+    @torch.inference_mode()
+    def _compute_priors_from_obs_inplace(
+        self,
+        node: Node,
+        obs: Observation,
+        legal_actions: List[Action],
+        prior_cache: Dict[Any, Dict[Action, float]],
+    ) -> None:
+        if not legal_actions:
+            node.priors = {}
+            return
+
+        encoded = self._encode_obs(obs)
+        cache_key = self._make_prior_cache_key(encoded)
+
+        cached = prior_cache.get(cache_key)
+        if cached is not None:
+            node.priors = {a: cached[a] for a in legal_actions if a in cached}
+            return
+
+        logits = self._call_model(encoded)
+
+        legal_mask = torch.tensor(
+            self.action_mapper.legal_action_mask(legal_actions),
+            dtype=torch.float32,
+            device=self.device,
+        )
+
+        probs = torch.softmax(logits, dim=-1) * legal_mask
+        mass = probs.sum()
+
+        if float(mass.item()) <= 0.0:
+            legal_indices = self.action_mapper.legal_indices(legal_actions)
+            probs = torch.zeros_like(probs)
+            if legal_indices:
+                uniform_prob = 1.0 / len(legal_indices)
+                for idx in legal_indices:
+                    probs[idx] = uniform_prob
+        else:
+            probs = probs / mass
+
+        priors: Dict[Action, float] = {}
+        for action in legal_actions:
+            idx = self.action_mapper.action_to_index(action)
+            priors[action] = max(self.prior_floor, float(probs[idx].item()))
+
+        total = sum(priors.values())
+        if total <= 0.0:
+            u = 1.0 / len(legal_actions)
+            for action in legal_actions:
+                priors[action] = u
+        else:
+            inv_total = 1.0 / total
+            for action in list(priors.keys()):
+                priors[action] *= inv_total
+
+        prior_cache[cache_key] = dict(priors)
+        node.priors = priors
+
+    # ------------------------------------------------------------------
+    # Tree helpers
+    # ------------------------------------------------------------------
 
     def _should_continue(self, sim_count: int, start_time: float) -> bool:
         if self.sims_per_move is None and self.time_limit_s is None:
             raise ValueError(
                 "At least one of sims_per_move or time_limit_s must be set"
             )
-
         if self.sims_per_move is not None and sim_count >= self.sims_per_move:
             return False
-
         if (
             self.time_limit_s is not None
             and (time.perf_counter() - start_time) >= self.time_limit_s
         ):
             return False
-
         return True
 
     def _node_key_from_obs(self, obs: Observation) -> NodeKey:
@@ -255,89 +345,6 @@ class NeuralISMCTSPUCTAgent:
 
         return best
 
-    def _make_prior_cache_key(self, encoded: Dict[str, Any]) -> Any:
-        static_key = tuple(encoded["static_features"])
-        history_key = tuple(tuple(token) for token in encoded["bid_history"])
-        mask_key = tuple(encoded["bid_mask"])
-        return (static_key, history_key, mask_key)
-
-    @torch.inference_mode()
-    def _compute_priors_from_obs_inplace(
-        self,
-        node: Node,
-        obs: Observation,
-        legal_actions: List[Action],
-        prior_cache: Dict[Any, Dict[Action, float]],
-    ) -> None:
-        if not legal_actions:
-            node.priors = {}
-            return
-
-        encoded = self.encoder.encode(obs)
-        cache_key = self._make_prior_cache_key(encoded)
-
-        cached = prior_cache.get(cache_key)
-        if cached is not None:
-            node.priors = {a: cached[a] for a in legal_actions if a in cached}
-            return
-
-        static_x = torch.tensor(
-            encoded["static_features"],
-            dtype=torch.float32,
-            device=self.device,
-        ).unsqueeze(0)
-
-        bid_history = torch.tensor(
-            encoded["bid_history"],
-            dtype=torch.float32,
-            device=self.device,
-        ).unsqueeze(0)
-
-        bid_mask = torch.tensor(
-            encoded["bid_mask"],
-            dtype=torch.bool,
-            device=self.device,
-        ).unsqueeze(0)
-
-        logits = self.model(static_x, bid_history, bid_mask).squeeze(0)
-
-        legal_mask = torch.tensor(
-            self.action_mapper.legal_action_mask(legal_actions),
-            dtype=torch.float32,
-            device=self.device,
-        )
-
-        probs = torch.softmax(logits, dim=-1) * legal_mask
-        mass = probs.sum()
-
-        if float(mass.item()) <= 0.0:
-            legal_indices = self.action_mapper.legal_indices(legal_actions)
-            probs = torch.zeros_like(probs)
-            if legal_indices:
-                uniform_prob = 1.0 / len(legal_indices)
-                for idx in legal_indices:
-                    probs[idx] = uniform_prob
-        else:
-            probs = probs / mass
-
-        priors: Dict[Action, float] = {}
-        for action in legal_actions:
-            idx = self.action_mapper.action_to_index(action)
-            priors[action] = max(self.prior_floor, float(probs[idx].item()))
-
-        total = sum(priors.values())
-        if total <= 0.0:
-            u = 1.0 / len(legal_actions)
-            for action in legal_actions:
-                priors[action] = u
-        else:
-            inv_total = 1.0 / total
-            for action in list(priors.keys()):
-                priors[action] *= inv_total
-
-        prior_cache[cache_key] = dict(priors)
-        node.priors = priors
-
     def _root_visit_distribution(
         self,
         root: Node,
@@ -356,6 +363,10 @@ class NeuralISMCTSPUCTAgent:
             e = node.edges.setdefault(action, EdgeStats())
             e.visit_count += 1
             e.value_sum += reward
+
+    # ------------------------------------------------------------------
+    # Rollout
+    # ------------------------------------------------------------------
 
     def _rollout_to_showdown(self, game: LiarsDiceGame, root_player: int) -> float:
         if game.num_alive() <= 1:

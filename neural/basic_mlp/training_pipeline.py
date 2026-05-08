@@ -7,9 +7,9 @@ from typing import Any, Dict, List, Tuple
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from neural.action_mapping import ActionMapper
-from neural.basic_mlp.encoder import ObservationEncoder
-from neural.basic_mlp.nn_model import PolicyNetwork
+from neural.common.action_mapping import ActionMapper
+from neural.basic_mlp.encoder_mlp import ObservationEncoder
+from neural.basic_mlp.model_mlp import PolicyNetwork
 
 Action = Tuple[str, Any]
 

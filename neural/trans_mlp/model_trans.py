@@ -5,13 +5,6 @@ from torch import nn
 
 
 class PolicyNetwork(nn.Module):
-    """
-    Policy network with:
-    - static feature branch
-    - tiny transformer over current-round bid history
-    - fusion MLP head
-    """
-
     def __init__(
         self,
         static_dim: int,
