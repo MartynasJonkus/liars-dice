@@ -32,8 +32,5 @@ ENV/
 .DS_Store
 Thumbs.db
 
-artifacts/eval
-artifacts/data*
-artifacts/benchmark_results
-sweep_results/
+artifacts/
 old_files/

@@ -27,7 +27,7 @@ from neural.trans_mlp.data_collection_trans import (
 # =====================
 # CONFIG
 # =====================
-NUM_GAMES = 10
+NUM_GAMES = 10000
 WORKERS = max(1, (os.cpu_count() or 2) - 1)
 
 OUTPUT_DIR = Path("artifacts/data")

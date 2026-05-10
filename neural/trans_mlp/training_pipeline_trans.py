@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Tuple, Type
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -10,40 +10,41 @@ from torch.utils.data import DataLoader, Dataset
 from neural.common.action_mapping import ActionMapper
 from neural.trans_mlp.data_collection_trans import PolicySample
 from neural.trans_mlp.encoder_trans import ObservationEncoder
+from neural.trans_mlp.model_trans import PolicyNetwork
 
 
 class PolicyDataset(Dataset):
     def __init__(self, samples: List[PolicySample]):
+        if not samples:
+            raise ValueError("PolicyDataset received no samples")
         self.samples = samples
 
     def __len__(self) -> int:
         return len(self.samples)
 
     def __getitem__(self, idx: int):
-        s = self.samples[idx]
+        sample = self.samples[idx]
         return (
-            torch.tensor(s.static_features, dtype=torch.float32),
-            torch.tensor(s.bid_history, dtype=torch.float32),
-            torch.tensor(s.bid_mask, dtype=torch.bool),
-            torch.tensor(s.target_policy, dtype=torch.float32),
+            torch.tensor(sample.static_features, dtype=torch.float32),
+            torch.tensor(sample.bid_history, dtype=torch.float32),
+            torch.tensor(sample.bid_mask, dtype=torch.bool),
+            torch.tensor(sample.target_policy, dtype=torch.float32),
         )
 
 
 @dataclass
 class TrainingConfig:
-    batch_size: int = 128
+    batch_size: int = 256
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
-    epochs: int = 20
+    epochs: int = 30
     device: str = "cpu"
 
 
-def policy_cross_entropy_loss(
-    logits: torch.Tensor,
-    target_policy: torch.Tensor,
-) -> torch.Tensor:
+def soft_policy_loss(logits: torch.Tensor, target_policy: torch.Tensor) -> torch.Tensor:
     """
-    Cross-entropy against a soft target distribution.
+    Cross-entropy with a soft target policy distribution.
+    target_policy is expected to sum to 1 for each sample.
     """
     log_probs = torch.log_softmax(logits, dim=-1)
     return -(target_policy * log_probs).sum(dim=-1).mean()
@@ -54,9 +55,8 @@ def build_dataloader(
     batch_size: int,
     shuffle: bool,
 ) -> DataLoader:
-    dataset = PolicyDataset(samples)
     return DataLoader(
-        dataset,
+        PolicyDataset(samples),
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=0,
@@ -82,7 +82,7 @@ def evaluate_policy_network(
     model.eval()
 
     total_loss = 0.0
-    batch_count = 0
+    batches = 0
 
     for static_x, bid_history, bid_mask, target_policy in loader:
         static_x = static_x.to(config.device)
@@ -91,30 +91,34 @@ def evaluate_policy_network(
         target_policy = target_policy.to(config.device)
 
         logits = model(static_x, bid_history, bid_mask)
-        loss = policy_cross_entropy_loss(logits, target_policy)
+        loss = soft_policy_loss(logits, target_policy)
 
         total_loss += float(loss.item())
-        batch_count += 1
+        batches += 1
 
-    return total_loss / max(1, batch_count)
+    if batches == 0:
+        raise ValueError("Validation loader produced no batches")
+
+    return total_loss / batches
 
 
 def train_policy_network(
     model: torch.nn.Module,
     train_samples: List[PolicySample],
     config: TrainingConfig,
-    val_samples: Optional[List[PolicySample]] = None,
-    encoder: Optional[ObservationEncoder] = None,
-    action_mapper: Optional[ActionMapper] = None,
-    best_checkpoint_path: Optional[str | Path] = None,
-    last_checkpoint_path: Optional[str | Path] = None,
+    val_samples: List[PolicySample] | None = None,
+    encoder: ObservationEncoder | None = None,
+    action_mapper: ActionMapper | None = None,
+    best_checkpoint_path: str | Path | None = None,
+    last_checkpoint_path: str | Path | None = None,
+    hidden_dim: int = 256,
+    d_model: int = 64,
+    nhead: int = 4,
+    num_layers: int = 2,
+    dim_feedforward: int = 128,
+    dropout: float = 0.1,
+    extra_metadata: Dict[str, Any] | None = None,
 ) -> Dict[str, List[float]]:
-    """
-    Trains the model and optionally:
-    - evaluates on validation every epoch
-    - saves best checkpoint by validation loss
-    - saves last checkpoint after final epoch
-    """
     if not train_samples:
         raise ValueError("Cannot train on an empty training sample list")
 
@@ -125,6 +129,7 @@ def train_policy_network(
     )
 
     model.to(config.device)
+
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=config.learning_rate,
@@ -132,18 +137,18 @@ def train_policy_network(
     )
 
     history: Dict[str, List[float]] = {
-        "train_loss": [],
-        "val_loss": [],
+        "train": [],
+        "val": [],
     }
 
-    best_val_loss = float("inf")
+    best_score = float("inf")
     has_validation = val_samples is not None and len(val_samples) > 0
 
-    for epoch in range(config.epochs):
+    for epoch in range(1, config.epochs + 1):
         model.train()
 
         running_loss = 0.0
-        batch_count = 0
+        batches = 0
 
         for static_x, bid_history, bid_mask, target_policy in train_loader:
             static_x = static_x.to(config.device)
@@ -152,17 +157,20 @@ def train_policy_network(
             target_policy = target_policy.to(config.device)
 
             logits = model(static_x, bid_history, bid_mask)
-            loss = policy_cross_entropy_loss(logits, target_policy)
+            loss = soft_policy_loss(logits, target_policy)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             running_loss += float(loss.item())
-            batch_count += 1
+            batches += 1
 
-        train_loss = running_loss / max(1, batch_count)
-        history["train_loss"].append(train_loss)
+        if batches == 0:
+            raise ValueError("Training loader produced no batches")
+
+        train_loss = running_loss / batches
+        history["train"].append(train_loss)
 
         if has_validation:
             val_loss = evaluate_policy_network(
@@ -170,37 +178,64 @@ def train_policy_network(
                 samples=val_samples,
                 config=config,
             )
-            history["val_loss"].append(val_loss)
-            print(
-                f"Epoch {epoch + 1:03d} | train={train_loss:.4f} | val={val_loss:.4f}"
-            )
-
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                if best_checkpoint_path is not None:
-                    if encoder is None or action_mapper is None:
-                        raise ValueError(
-                            "encoder and action_mapper are required to save checkpoints"
-                        )
-                    save_model_checkpoint(
-                        model=model,
-                        encoder=encoder,
-                        action_mapper=action_mapper,
-                        path=best_checkpoint_path,
-                    )
+            history["val"].append(val_loss)
+            score = val_loss
+            print(f"Epoch {epoch:03d} | train={train_loss:.4f} | val={val_loss:.4f}")
         else:
-            print(f"Epoch {epoch + 1:03d} | train={train_loss:.4f}")
+            score = train_loss
+            print(f"Epoch {epoch:03d} | train={train_loss:.4f}")
+
+        if score < best_score:
+            best_score = score
+            if best_checkpoint_path is not None:
+                if encoder is None or action_mapper is None:
+                    raise ValueError(
+                        "encoder and action_mapper are required to save checkpoints"
+                    )
+
+                save_model_checkpoint(
+                    model=model,
+                    encoder=encoder,
+                    action_mapper=action_mapper,
+                    path=best_checkpoint_path,
+                    hidden_dim=hidden_dim,
+                    d_model=d_model,
+                    nhead=nhead,
+                    num_layers=num_layers,
+                    dim_feedforward=dim_feedforward,
+                    dropout=dropout,
+                    extra_metadata={
+                        **(extra_metadata or {}),
+                        "best_epoch": epoch,
+                        "best_score": best_score,
+                        "selection_metric": (
+                            "val_loss" if has_validation else "train_loss"
+                        ),
+                    },
+                )
 
     if last_checkpoint_path is not None:
         if encoder is None or action_mapper is None:
             raise ValueError(
                 "encoder and action_mapper are required to save checkpoints"
             )
+
         save_model_checkpoint(
             model=model,
             encoder=encoder,
             action_mapper=action_mapper,
             path=last_checkpoint_path,
+            hidden_dim=hidden_dim,
+            d_model=d_model,
+            nhead=nhead,
+            num_layers=num_layers,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
+            extra_metadata={
+                **(extra_metadata or {}),
+                "final_train_loss": history["train"][-1],
+                "final_val_loss": history["val"][-1] if history["val"] else None,
+            },
         )
 
     return history
@@ -211,12 +246,32 @@ def save_model_checkpoint(
     encoder: ObservationEncoder,
     action_mapper: ActionMapper,
     path: str | Path,
+    hidden_dim: int = 256,
+    d_model: int = 64,
+    nhead: int = 4,
+    num_layers: int = 2,
+    dim_feedforward: int = 128,
+    dropout: float = 0.1,
+    extra_metadata: Dict[str, Any] | None = None,
 ) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    payload = {
+    payload: Dict[str, Any] = {
         "model_state_dict": model.state_dict(),
+        "model_config": {
+            "model_type": "transformer",
+            "static_dim": encoder.static_dim,
+            "token_dim": encoder.bid_token_dim,
+            "num_actions": action_mapper.num_actions,
+            "hidden_dim": hidden_dim,
+            "max_bids": encoder.max_bids,
+            "d_model": d_model,
+            "nhead": nhead,
+            "num_layers": num_layers,
+            "dim_feedforward": dim_feedforward,
+            "dropout": dropout,
+        },
         "encoder_config": {
             "num_players": encoder.num_players,
             "max_dice_per_player": encoder.max_dice_per_player,
@@ -226,29 +281,22 @@ def save_model_checkpoint(
         "action_mapper_config": {
             "max_total_dice": action_mapper.max_total_dice,
         },
-        "model_config": {
-            "static_dim": getattr(model, "static_dim", None),
-            "token_dim": getattr(model, "token_dim", None),
-            "num_actions": getattr(model, "num_actions", None),
-            "max_bids": getattr(model, "max_bids", None),
-            "d_model": getattr(model, "d_model", None),
-        },
     }
+
+    if extra_metadata is not None:
+        payload["metadata"] = extra_metadata
 
     torch.save(payload, path)
 
 
 def load_model_checkpoint(
     path: str | Path,
-    model_cls: Type[torch.nn.Module],
+    model_cls: Type[torch.nn.Module] = PolicyNetwork,
     device: str = "cpu",
-):
+) -> Tuple[torch.nn.Module, ObservationEncoder, ActionMapper]:
     """
-    Reconstruct model + encoder + action_mapper from checkpoint.
+    Reconstructs model, encoder, and action mapper from a saved checkpoint.
     """
-    from neural.common.action_mapping import ActionMapper
-    from neural.trans_mlp.encoder_trans import ObservationEncoder
-
     path = Path(path)
     payload = torch.load(path, map_location=device)
 
@@ -261,9 +309,15 @@ def load_model_checkpoint(
         static_dim=model_cfg["static_dim"],
         token_dim=model_cfg["token_dim"],
         num_actions=model_cfg["num_actions"],
+        hidden_dim=model_cfg["hidden_dim"],
         max_bids=model_cfg["max_bids"],
         d_model=model_cfg["d_model"],
+        nhead=model_cfg["nhead"],
+        num_layers=model_cfg["num_layers"],
+        dim_feedforward=model_cfg["dim_feedforward"],
+        dropout=model_cfg["dropout"],
     )
+
     model.load_state_dict(payload["model_state_dict"])
     model.to(device)
     model.eval()

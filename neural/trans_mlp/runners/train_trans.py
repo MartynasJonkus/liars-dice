@@ -11,17 +11,20 @@ from neural.common.action_mapping import ActionMapper
 from neural.trans_mlp.data_collection_trans import PolicySample
 from neural.trans_mlp.encoder_trans import ObservationEncoder
 from neural.trans_mlp.model_trans import PolicyNetwork
-from neural.trans_mlp.training_pipeline import TrainingConfig, train_policy_network
+from neural.trans_mlp.training_pipeline_trans import (
+    TrainingConfig,
+    train_policy_network,
+)
 
 # =====================
 # CONFIG
 # =====================
-DATA_PATH = "artifacts/data_trans/supervised_samples.jsonl"
-OUTPUT_DIR = "artifacts/training_trans"
+DATA_PATH = "artifacts/data/trans/supervised_samples.jsonl"
+OUTPUT_DIR = "artifacts/training/trans"
 
 NUM_PLAYERS = 4
 DICE_PER_PLAYER = 5
-MAX_BIDS = 40
+MAX_BIDS = 10
 
 BATCH_SIZE = 256
 LEARNING_RATE = 1e-3
@@ -45,7 +48,12 @@ SEED = 12345
 # =====================
 def load_samples_jsonl(path: str | Path) -> List[PolicySample]:
     path = Path(path)
+
+    if not path.exists():
+        raise FileNotFoundError(f"Training data not found: {path}")
+
     samples: List[PolicySample] = []
+    skipped_zero_mass = 0
 
     with path.open("r", encoding="utf-8") as f:
         for line_num, line in enumerate(f, start=1):
@@ -58,17 +66,33 @@ def load_samples_jsonl(path: str | Path) -> List[PolicySample]:
             except json.JSONDecodeError as exc:
                 raise ValueError(f"Invalid JSON on line {line_num} in {path}") from exc
 
+            target_policy = obj.get("target_policy")
+            if target_policy is None:
+                raise KeyError(f"Line {line_num} is missing 'target_policy'")
+
+            target_policy = [float(x) for x in target_policy]
+            mass = sum(target_policy)
+
+            if mass <= 0.0:
+                skipped_zero_mass += 1
+                continue
+
+            target_policy = [x / mass for x in target_policy]
+
             samples.append(
                 PolicySample(
-                    static_features=obj["static_features"],
-                    bid_history=obj["bid_history"],
-                    bid_mask=obj["bid_mask"],
-                    target_policy=obj["target_policy"],
+                    static_features=[float(x) for x in obj["static_features"]],
+                    bid_history=[[float(v) for v in row] for row in obj["bid_history"]],
+                    bid_mask=[bool(x) for x in obj["bid_mask"]],
+                    target_policy=target_policy,
                 )
             )
 
     if not samples:
-        raise ValueError(f"No samples found in {path}")
+        raise ValueError(f"No valid samples found in {path}")
+
+    if skipped_zero_mass > 0:
+        print(f"Skipped {skipped_zero_mass} samples with zero target-policy mass")
 
     return samples
 
@@ -86,8 +110,12 @@ def split_samples(
     rng.shuffle(shuffled)
 
     val_size = int(len(shuffled) * val_fraction)
+
     if val_fraction > 0.0 and val_size == 0 and len(shuffled) > 1:
         val_size = 1
+
+    if val_size >= len(shuffled):
+        val_size = max(0, len(shuffled) - 1)
 
     val_samples = shuffled[:val_size]
     train_samples = shuffled[val_size:]
@@ -108,39 +136,40 @@ def validate_sample_shapes(
     expected_max_bids = encoder.max_bids
     expected_num_actions = action_mapper.num_actions
 
-    for i, s in enumerate(samples[:100]):
-        if len(s.static_features) != expected_static_dim:
+    # Validate a subset to avoid scanning very large datasets twice.
+    for i, sample in enumerate(samples[:100]):
+        if len(sample.static_features) != expected_static_dim:
             raise ValueError(
-                f"Sample {i}: static_features length {len(s.static_features)} "
-                f"!= expected {expected_static_dim}"
+                f"Sample {i}: static_features length "
+                f"{len(sample.static_features)} != expected {expected_static_dim}"
             )
 
-        if len(s.bid_history) != expected_max_bids:
+        if len(sample.bid_history) != expected_max_bids:
             raise ValueError(
-                f"Sample {i}: bid_history length {len(s.bid_history)} "
-                f"!= expected {expected_max_bids}"
+                f"Sample {i}: bid_history length "
+                f"{len(sample.bid_history)} != expected {expected_max_bids}"
             )
 
-        for j, token in enumerate(s.bid_history):
+        for j, token in enumerate(sample.bid_history):
             if len(token) != expected_token_dim:
                 raise ValueError(
-                    f"Sample {i}, token {j}: token length {len(token)} "
-                    f"!= expected {expected_token_dim}"
+                    f"Sample {i}, token {j}: token length "
+                    f"{len(token)} != expected {expected_token_dim}"
                 )
 
-        if len(s.bid_mask) != expected_max_bids:
+        if len(sample.bid_mask) != expected_max_bids:
             raise ValueError(
-                f"Sample {i}: bid_mask length {len(s.bid_mask)} "
-                f"!= expected {expected_max_bids}"
+                f"Sample {i}: bid_mask length "
+                f"{len(sample.bid_mask)} != expected {expected_max_bids}"
             )
 
-        if len(s.target_policy) != expected_num_actions:
+        if len(sample.target_policy) != expected_num_actions:
             raise ValueError(
-                f"Sample {i}: target_policy length {len(s.target_policy)} "
-                f"!= expected {expected_num_actions}"
+                f"Sample {i}: target_policy length "
+                f"{len(sample.target_policy)} != expected {expected_num_actions}"
             )
 
-        target_sum = sum(s.target_policy)
+        target_sum = sum(sample.target_policy)
         if abs(target_sum - 1.0) > 1e-4:
             raise ValueError(
                 f"Sample {i}: target_policy sums to {target_sum:.6f}, expected 1.0"
@@ -150,6 +179,7 @@ def validate_sample_shapes(
 def save_history(path: str | Path, history: dict) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+
     with path.open("w", encoding="utf-8") as f:
         json.dump(history, f, indent=2)
 
@@ -177,7 +207,7 @@ def main() -> None:
 
     print(f"Loading samples from: {DATA_PATH}")
     samples = load_samples_jsonl(DATA_PATH)
-    print(f"Loaded {len(samples)} samples")
+    print(f"Loaded {len(samples):,} valid samples")
 
     print("Validating sample shapes...")
     validate_sample_shapes(samples, encoder, action_mapper)
@@ -189,8 +219,13 @@ def main() -> None:
         seed=SEED,
     )
 
-    print(f"Train samples: {len(train_samples)}")
-    print(f"Val samples:   {len(val_samples)}")
+    print(f"Train samples: {len(train_samples):,}")
+    print(f"Val samples:   {len(val_samples):,}")
+    print(f"Static dim:    {encoder.static_dim}")
+    print(f"Token dim:     {encoder.bid_token_dim}")
+    print(f"Max bids:      {encoder.max_bids}")
+    print(f"Actions:       {action_mapper.num_actions}")
+    print(f"Device:        {DEVICE}")
 
     model = PolicyNetwork(
         static_dim=encoder.static_dim,
@@ -213,7 +248,27 @@ def main() -> None:
         device=DEVICE,
     )
 
+    metadata = {
+        "data_path": DATA_PATH,
+        "batch_size": BATCH_SIZE,
+        "epochs": EPOCHS,
+        "learning_rate": LEARNING_RATE,
+        "weight_decay": WEIGHT_DECAY,
+        "val_fraction": VAL_FRACTION,
+        "seed": SEED,
+        "num_players": NUM_PLAYERS,
+        "dice_per_player": DICE_PER_PLAYER,
+        "max_bids": MAX_BIDS,
+        "hidden_dim": HIDDEN_DIM,
+        "d_model": D_MODEL,
+        "nhead": NHEAD,
+        "num_layers": NUM_LAYERS,
+        "dim_feedforward": DIM_FEEDFORWARD,
+        "dropout": DROPOUT,
+    }
+
     print(f"Training on {DEVICE}...")
+
     history = train_policy_network(
         model=model,
         train_samples=train_samples,
@@ -223,11 +278,19 @@ def main() -> None:
         action_mapper=action_mapper,
         best_checkpoint_path=output_dir / "best.pt",
         last_checkpoint_path=output_dir / "last.pt",
+        hidden_dim=HIDDEN_DIM,
+        d_model=D_MODEL,
+        nhead=NHEAD,
+        num_layers=NUM_LAYERS,
+        dim_feedforward=DIM_FEEDFORWARD,
+        dropout=DROPOUT,
+        extra_metadata=metadata,
     )
 
     history_path = output_dir / "history.json"
     save_history(history_path, history)
 
+    print("Training complete.")
     print(f"Saved training history to: {history_path}")
     print(f"Saved best checkpoint to: {output_dir / 'best.pt'}")
     print(f"Saved last checkpoint to: {output_dir / 'last.pt'}")

@@ -22,6 +22,8 @@ class PolicySample:
 
 class PolicyDataset(Dataset):
     def __init__(self, samples: List[PolicySample]):
+        if not samples:
+            raise ValueError("PolicyDataset received no samples")
         self.samples = samples
 
     def __len__(self) -> int:
@@ -36,11 +38,20 @@ class PolicyDataset(Dataset):
 
 @dataclass
 class TrainingConfig:
-    batch_size: int = 128
+    batch_size: int = 256
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
-    epochs: int = 20
+    epochs: int = 30
     device: str = "cpu"
+
+
+def soft_policy_loss(logits: torch.Tensor, target_policy: torch.Tensor) -> torch.Tensor:
+    """
+    Cross-entropy with a soft target policy distribution.
+    target_policy is expected to sum to 1 for each sample.
+    """
+    log_probs = torch.log_softmax(logits, dim=-1)
+    return -(target_policy * log_probs).sum(dim=-1).mean()
 
 
 def train_policy_network(
@@ -48,6 +59,10 @@ def train_policy_network(
     samples: List[PolicySample],
     config: TrainingConfig,
 ) -> Dict[str, List[float]]:
+    """
+    Simple training helper for cases where no validation split is needed.
+    The main runner in train_mlp.py implements the train/validation workflow.
+    """
     if not samples:
         raise ValueError("No training samples provided")
 
@@ -62,18 +77,18 @@ def train_policy_network(
     )
 
     history: Dict[str, List[float]] = {"loss": []}
-    model.train()
 
-    for epoch in range(config.epochs):
+    for _epoch in range(config.epochs):
+        model.train()
         running_loss = 0.0
         batches = 0
+
         for x, target_policy in loader:
             x = x.to(config.device)
             target_policy = target_policy.to(config.device)
 
             logits = model(x)
-            log_probs = torch.log_softmax(logits, dim=-1)
-            loss = -(target_policy * log_probs).sum(dim=-1).mean()
+            loss = soft_policy_loss(logits, target_policy)
 
             optimizer.zero_grad()
             loss.backward()
@@ -92,9 +107,26 @@ def save_model_checkpoint(
     encoder: ObservationEncoder,
     action_mapper: ActionMapper,
     path: str | Path,
+    hidden_dim: int = 256,
+    dropout: float = 0.1,
+    extra_metadata: Dict[str, Any] | None = None,
 ) -> None:
-    payload = {
+    """
+    Saves enough information to reconstruct the MLP policy model and its
+    matching encoder/action mapper during evaluation or benchmarking.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    payload: Dict[str, Any] = {
         "model_state_dict": model.state_dict(),
+        "model_config": {
+            "model_type": "mlp",
+            "input_dim": encoder.input_dim,
+            "num_actions": action_mapper.num_actions,
+            "hidden_dim": hidden_dim,
+            "dropout": dropout,
+        },
         "encoder_config": {
             "num_players": encoder.num_players,
             "max_dice_per_player": encoder.max_dice_per_player,
@@ -105,4 +137,8 @@ def save_model_checkpoint(
             "max_total_dice": action_mapper.max_total_dice,
         },
     }
-    torch.save(payload, Path(path))
+
+    if extra_metadata is not None:
+        payload["metadata"] = extra_metadata
+
+    torch.save(payload, path)
