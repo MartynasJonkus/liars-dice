@@ -32,5 +32,6 @@ ENV/
 .DS_Store
 Thumbs.db
 
-artifacts/
+artifacts/data
+artifacts/self_play
 old_files/

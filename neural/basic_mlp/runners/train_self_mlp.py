@@ -16,7 +16,7 @@ from liars_dice.core.game import LiarsDiceGame
 from neural.common.action_mapping import ActionMapper
 from neural.basic_mlp.encoder_mlp import ObservationEncoder
 from neural.basic_mlp.model_mlp import PolicyNetwork
-from neural.basic_mlp.neural_ismcts_mlp import NeuralISMCTSPUCTAgent
+from neural.basic_mlp.neural_ismcts_mlp import MLPNeuralISMCTSAgent
 from neural.basic_mlp.training_pipeline_mlp import save_model_checkpoint
 
 # =====================
@@ -33,8 +33,8 @@ ITERATIONS = 10
 SELF_PLAY_GAMES_PER_ITER = 100
 EVAL_GAMES = 100
 
-SIMS_PER_MOVE_SELF_PLAY = 300
-SIMS_PER_MOVE_EVAL = 300
+SIMS_PER_MOVE_SELF_PLAY = 500
+SIMS_PER_MOVE_EVAL = 500
 
 BUFFER_SIZE = 100_000
 BATCH_SIZE = 512
@@ -217,7 +217,7 @@ def run_self_play_game(
     rng = random.Random(seed)
 
     agents = [
-        NeuralISMCTSPUCTAgent(
+        MLPNeuralISMCTSAgent(
             model=model,
             encoder=encoder,
             action_mapper=action_mapper,
@@ -372,7 +372,7 @@ def run_eval_game(
         model = new_model if group == "new" else best_model
 
         agents.append(
-            NeuralISMCTSPUCTAgent(
+            MLPNeuralISMCTSAgent(
                 model=model,
                 encoder=encoder,
                 action_mapper=action_mapper,
