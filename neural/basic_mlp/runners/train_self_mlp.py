@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import random
 import time
 from collections import defaultdict, deque
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -13,6 +15,7 @@ import torch
 from tqdm import tqdm
 
 from liars_dice.core.game import LiarsDiceGame
+
 from neural.common.action_mapping import ActionMapper
 from neural.basic_mlp.encoder_mlp import ObservationEncoder
 from neural.basic_mlp.model_mlp import PolicyNetwork
@@ -33,8 +36,10 @@ ITERATIONS = 10
 SELF_PLAY_GAMES_PER_ITER = 100
 EVAL_GAMES = 100
 
-SIMS_PER_MOVE_SELF_PLAY = 500
-SIMS_PER_MOVE_EVAL = 500
+SIMS_PER_MOVE_SELF_PLAY = 300
+SIMS_PER_MOVE_EVAL = 300
+
+WORKERS = max(1, min((os.cpu_count() or 2) - 1, SELF_PLAY_GAMES_PER_ITER))
 
 BUFFER_SIZE = 100_000
 BATCH_SIZE = 512
@@ -45,8 +50,20 @@ WEIGHT_DECAY = 1e-4
 TEMPERATURE = 1.0
 ACCEPT_WIN_RATE = 0.55
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+TRAIN_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+WORKER_DEVICE = "cpu"
+
 BASE_SEED = 12345
+
+
+# =====================
+# WORKER GLOBALS
+# =====================
+_worker_model: PolicyNetwork | None = None
+_worker_best_model: PolicyNetwork | None = None
+_worker_encoder: ObservationEncoder | None = None
+_worker_action_mapper: ActionMapper | None = None
+_worker_model_cfg: Dict[str, Any] | None = None
 
 
 # =====================
@@ -79,6 +96,7 @@ def script_config() -> Dict[str, Any]:
         "iterations": ITERATIONS,
         "self_play_games_per_iter": SELF_PLAY_GAMES_PER_ITER,
         "eval_games": EVAL_GAMES,
+        "workers": WORKERS,
         "sims_per_move_self_play": SIMS_PER_MOVE_SELF_PLAY,
         "sims_per_move_eval": SIMS_PER_MOVE_EVAL,
         "buffer_size": BUFFER_SIZE,
@@ -88,14 +106,37 @@ def script_config() -> Dict[str, Any]:
         "weight_decay": WEIGHT_DECAY,
         "temperature": TEMPERATURE,
         "accept_win_rate": ACCEPT_WIN_RATE,
-        "device": DEVICE,
+        "train_device": TRAIN_DEVICE,
+        "worker_device": WORKER_DEVICE,
         "base_seed": BASE_SEED,
     }
 
 
+def state_dict_to_cpu(model: torch.nn.Module) -> Dict[str, torch.Tensor]:
+    return {k: v.detach().cpu() for k, v in model.state_dict().items()}
+
+
 # =====================
-# LOADING
+# MODEL HELPERS
 # =====================
+def build_mlp_model(
+    model_cfg: Dict[str, Any],
+    encoder: ObservationEncoder,
+    action_mapper: ActionMapper,
+    device: str,
+) -> PolicyNetwork:
+    model = PolicyNetwork(
+        input_dim=encoder.input_dim,
+        num_actions=action_mapper.num_actions,
+        hidden_dim=int(model_cfg["hidden_dim"]),
+        dropout=float(model_cfg["dropout"]),
+    )
+
+    model.to(device)
+    model.eval()
+    return model
+
+
 def load_initial_model(
     checkpoint_path: str | Path,
 ) -> Tuple[PolicyNetwork, ObservationEncoder, ActionMapper, Dict[str, Any]]:
@@ -104,7 +145,7 @@ def load_initial_model(
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Initial checkpoint not found: {checkpoint_path}")
 
-    payload = torch.load(checkpoint_path, map_location=DEVICE)
+    payload = torch.load(checkpoint_path, map_location=TRAIN_DEVICE)
 
     encoder = ObservationEncoder(**payload["encoder_config"])
     action_mapper = ActionMapper(**payload["action_mapper_config"])
@@ -127,24 +168,26 @@ def load_initial_model(
             f"but action_mapper.num_actions={action_mapper.num_actions}"
         )
 
-    model = PolicyNetwork(
-        input_dim=encoder.input_dim,
-        num_actions=action_mapper.num_actions,
-        hidden_dim=hidden_dim,
-        dropout=dropout,
+    normalized_model_cfg = {
+        "model_type": "mlp",
+        "input_dim": encoder.input_dim,
+        "num_actions": action_mapper.num_actions,
+        "hidden_dim": hidden_dim,
+        "dropout": dropout,
+    }
+
+    model = build_mlp_model(
+        model_cfg=normalized_model_cfg,
+        encoder=encoder,
+        action_mapper=action_mapper,
+        device=TRAIN_DEVICE,
     )
 
     model.load_state_dict(payload["model_state_dict"])
-    model.to(DEVICE)
     model.eval()
 
     checkpoint_info = {
-        "model_config": {
-            "input_dim": encoder.input_dim,
-            "num_actions": action_mapper.num_actions,
-            "hidden_dim": hidden_dim,
-            "dropout": dropout,
-        },
+        "model_config": normalized_model_cfg,
         "encoder_config": payload["encoder_config"],
         "action_mapper_config": payload["action_mapper_config"],
         "checkpoint_metadata": payload.get("metadata", {}),
@@ -154,7 +197,76 @@ def load_initial_model(
 
 
 # =====================
-# SELF-PLAY
+# WORKER INITIALIZERS
+# =====================
+def init_self_play_worker(
+    model_state_dict: Dict[str, torch.Tensor],
+    model_cfg: Dict[str, Any],
+    encoder_config: Dict[str, Any],
+    action_mapper_config: Dict[str, Any],
+) -> None:
+    global _worker_model
+    global _worker_encoder
+    global _worker_action_mapper
+    global _worker_model_cfg
+
+    torch.set_num_threads(1)
+
+    _worker_encoder = ObservationEncoder(**encoder_config)
+    _worker_action_mapper = ActionMapper(**action_mapper_config)
+    _worker_model_cfg = model_cfg
+
+    _worker_model = build_mlp_model(
+        model_cfg=model_cfg,
+        encoder=_worker_encoder,
+        action_mapper=_worker_action_mapper,
+        device=WORKER_DEVICE,
+    )
+
+    _worker_model.load_state_dict(model_state_dict)
+    _worker_model.eval()
+
+
+def init_eval_worker(
+    new_state_dict: Dict[str, torch.Tensor],
+    best_state_dict: Dict[str, torch.Tensor],
+    model_cfg: Dict[str, Any],
+    encoder_config: Dict[str, Any],
+    action_mapper_config: Dict[str, Any],
+) -> None:
+    global _worker_model
+    global _worker_best_model
+    global _worker_encoder
+    global _worker_action_mapper
+    global _worker_model_cfg
+
+    torch.set_num_threads(1)
+
+    _worker_encoder = ObservationEncoder(**encoder_config)
+    _worker_action_mapper = ActionMapper(**action_mapper_config)
+    _worker_model_cfg = model_cfg
+
+    _worker_model = build_mlp_model(
+        model_cfg=model_cfg,
+        encoder=_worker_encoder,
+        action_mapper=_worker_action_mapper,
+        device=WORKER_DEVICE,
+    )
+    _worker_model.load_state_dict(new_state_dict)
+    _worker_model.eval()
+
+    _worker_best_model = build_mlp_model(
+        model_cfg=model_cfg,
+        encoder=_worker_encoder,
+        action_mapper=_worker_action_mapper,
+        device=WORKER_DEVICE,
+    )
+    _worker_best_model.load_state_dict(best_state_dict)
+    _worker_best_model.eval()
+
+
+# =====================
+# SELF-PLAY HELPERS
 # =====================
 def sample_action_from_policy(
     root_policy: Dict[Tuple[str, Any], float],
@@ -166,10 +278,7 @@ def sample_action_from_policy(
     if not actions:
         raise ValueError("Cannot sample from an empty root policy")
 
-    probs = torch.tensor(
-        [float(root_policy[a]) for a in actions],
-        dtype=torch.float32,
-    )
+    probs = torch.tensor([float(root_policy[a]) for a in actions], dtype=torch.float32)
 
     if temperature <= 0.0:
         best_prob = probs.max().item()
@@ -179,12 +288,12 @@ def sample_action_from_policy(
         return rng.choice(candidates)
 
     probs = probs.pow(1.0 / temperature)
-    probs_sum = probs.sum()
+    total = probs.sum()
 
-    if probs_sum.item() <= 0.0:
+    if total.item() <= 0.0:
         return rng.choice(actions)
 
-    probs = probs / probs_sum
+    probs = probs / total
     idx = torch.multinomial(probs, 1).item()
 
     return actions[idx]
@@ -208,19 +317,39 @@ def root_policy_to_target_vector(
     return [float(x) for x in target.tolist()]
 
 
-def run_self_play_game(
-    model: PolicyNetwork,
+def encode_self_play_sample(
     encoder: ObservationEncoder,
-    action_mapper: ActionMapper,
-    seed: int,
-) -> Tuple[List[SelfPlaySample], Dict[str, Any]]:
+    obs,
+    target_policy: List[float],
+) -> SelfPlaySample:
+    encoded = encoder.encode(obs)
+
+    if isinstance(encoded, dict):
+        features = encoded["features"]
+    else:
+        features = encoded
+
+    return SelfPlaySample(
+        features=[float(x) for x in features],
+        target_policy=[float(x) for x in target_policy],
+    )
+
+
+def run_self_play_game_worker(seed: int) -> Tuple[List[SelfPlaySample], Dict[str, Any]]:
+    if (
+        _worker_model is None
+        or _worker_encoder is None
+        or _worker_action_mapper is None
+    ):
+        raise RuntimeError("Self-play worker was not initialized")
+
     rng = random.Random(seed)
 
     agents = [
         MLPNeuralISMCTSAgent(
-            model=model,
-            encoder=encoder,
-            action_mapper=action_mapper,
+            model=_worker_model,
+            encoder=_worker_encoder,
+            action_mapper=_worker_action_mapper,
             seed=rng.randint(0, 10**9),
             sims_per_move=SIMS_PER_MOVE_SELF_PLAY,
             time_limit_s=None,
@@ -243,18 +372,21 @@ def run_self_play_game(
         obs = game.observe(pid)
 
         action, root_policy, sim_count = agents[pid].search_policy(game, obs)
+
         total_sims += int(sim_count)
         moves += 1
 
         if root_policy:
-            target_policy = root_policy_to_target_vector(root_policy, action_mapper)
+            target_policy = root_policy_to_target_vector(
+                root_policy=root_policy,
+                action_mapper=_worker_action_mapper,
+            )
 
             if target_policy:
-                features = encoder.encode(obs)
-
                 samples.append(
-                    SelfPlaySample(
-                        features=[float(x) for x in features],
+                    encode_self_play_sample(
+                        encoder=_worker_encoder,
+                        obs=obs,
                         target_policy=target_policy,
                     )
                 )
@@ -277,6 +409,54 @@ def run_self_play_game(
     }
 
     return samples, stats
+
+
+def collect_self_play_parallel(
+    model: PolicyNetwork,
+    checkpoint_info: Dict[str, Any],
+    iteration: int,
+) -> Tuple[List[SelfPlaySample], Dict[str, Any]]:
+    seeds = [
+        BASE_SEED + iteration * 1_000_000 + game_idx
+        for game_idx in range(SELF_PLAY_GAMES_PER_ITER)
+    ]
+
+    model_state = state_dict_to_cpu(model)
+    model_cfg = checkpoint_info["model_config"]
+    encoder_config = checkpoint_info["encoder_config"]
+    action_mapper_config = checkpoint_info["action_mapper_config"]
+
+    all_samples: List[SelfPlaySample] = []
+    total_moves = 0
+    total_sims = 0
+
+    with ProcessPoolExecutor(
+        max_workers=WORKERS,
+        initializer=init_self_play_worker,
+        initargs=(model_state, model_cfg, encoder_config, action_mapper_config),
+    ) as executor:
+        futures = [executor.submit(run_self_play_game_worker, seed) for seed in seeds]
+
+        for future in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc="Self-play games",
+        ):
+            samples, stats = future.result()
+
+            all_samples.extend(samples)
+            total_moves += int(stats["moves"])
+            total_sims += int(stats["total_sims"])
+
+    summary = {
+        "games": SELF_PLAY_GAMES_PER_ITER,
+        "samples": len(all_samples),
+        "total_moves": total_moves,
+        "total_sims": total_sims,
+        "avg_sims_per_move": total_sims / total_moves if total_moves > 0 else 0.0,
+    }
+
+    return all_samples, summary
 
 
 # =====================
@@ -313,13 +493,13 @@ def train_one_iteration(
             features = torch.tensor(
                 [sample.features for sample in batch],
                 dtype=torch.float32,
-                device=DEVICE,
+                device=TRAIN_DEVICE,
             )
 
             target_policy = torch.tensor(
                 [sample.target_policy for sample in batch],
                 dtype=torch.float32,
-                device=DEVICE,
+                device=TRAIN_DEVICE,
             )
 
             logits = model(features)
@@ -343,25 +523,15 @@ def train_one_iteration(
 # =====================
 # EVALUATION
 # =====================
-def run_eval_game(
-    new_model: PolicyNetwork,
-    best_model: PolicyNetwork,
-    encoder: ObservationEncoder,
-    action_mapper: ActionMapper,
-    seed: int,
-) -> Tuple[int, Dict[str, int], Dict[str, Any]]:
-    """
-    Runs one 4-player evaluation game with 2 new-model agents and 2 best-model agents.
+def run_eval_game_worker(seed: int) -> Tuple[int, Dict[str, int], Dict[str, Any]]:
+    if (
+        _worker_model is None
+        or _worker_best_model is None
+        or _worker_encoder is None
+        or _worker_action_mapper is None
+    ):
+        raise RuntimeError("Eval worker was not initialized")
 
-    Returns:
-      winner_group:
-        1 if a new-model seat wins,
-        0 if a best-model seat wins.
-      placement_counts:
-        placement counts by group.
-      stats:
-        move/simulation counts.
-    """
     rng = random.Random(seed)
 
     seat_groups = ["new", "new", "best", "best"]
@@ -369,13 +539,13 @@ def run_eval_game(
 
     agents = []
     for group in seat_groups:
-        model = new_model if group == "new" else best_model
+        model = _worker_model if group == "new" else _worker_best_model
 
         agents.append(
             MLPNeuralISMCTSAgent(
                 model=model,
-                encoder=encoder,
-                action_mapper=action_mapper,
+                encoder=_worker_encoder,
+                action_mapper=_worker_action_mapper,
                 seed=rng.randint(0, 10**9),
                 sims_per_move=SIMS_PER_MOVE_EVAL,
                 time_limit_s=None,
@@ -391,12 +561,14 @@ def run_eval_game(
     eliminated: List[int] = []
     total_sims = 0
     moves = 0
+    winner = None
 
     while True:
         pid = game._current
         obs = game.observe(pid)
 
         action = agents[pid].select_action(game, obs)
+
         total_sims += int(getattr(agents[pid], "_last_sim_count", 0))
         moves += 1
 
@@ -412,9 +584,13 @@ def run_eval_game(
                 eliminated.append(winner)
             break
 
+    if winner is None:
+        raise RuntimeError("Evaluation game ended without winner")
+
     winner_group = 1 if seat_groups[winner] == "new" else 0
 
     placements_best_to_worst = eliminated[::-1]
+
     placement_counts = {
         "new_first": 0,
         "new_second": 0,
@@ -447,35 +623,56 @@ def run_eval_game(
     return winner_group, placement_counts, stats
 
 
-def evaluate_new_vs_best(
+def evaluate_new_vs_best_parallel(
     new_model: PolicyNetwork,
     best_model: PolicyNetwork,
-    encoder: ObservationEncoder,
-    action_mapper: ActionMapper,
+    checkpoint_info: Dict[str, Any],
     iteration: int,
 ) -> Dict[str, float]:
+    seeds = [
+        BASE_SEED + iteration * 10_000_000 + game_idx for game_idx in range(EVAL_GAMES)
+    ]
+
+    new_state = state_dict_to_cpu(new_model)
+    best_state = state_dict_to_cpu(best_model)
+
+    model_cfg = checkpoint_info["model_config"]
+    encoder_config = checkpoint_info["encoder_config"]
+    action_mapper_config = checkpoint_info["action_mapper_config"]
+
     new_wins = 0
     placement_totals = defaultdict(int)
 
     total_moves = 0
     total_sims = 0
 
-    for game_idx in tqdm(range(EVAL_GAMES), desc="Evaluation"):
-        winner_group, placement_counts, stats = run_eval_game(
-            new_model=new_model,
-            best_model=best_model,
-            encoder=encoder,
-            action_mapper=action_mapper,
-            seed=BASE_SEED + iteration * 10_000_000 + game_idx,
-        )
+    with ProcessPoolExecutor(
+        max_workers=WORKERS,
+        initializer=init_eval_worker,
+        initargs=(
+            new_state,
+            best_state,
+            model_cfg,
+            encoder_config,
+            action_mapper_config,
+        ),
+    ) as executor:
+        futures = [executor.submit(run_eval_game_worker, seed) for seed in seeds]
 
-        new_wins += winner_group
+        for future in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc="Evaluation games",
+        ):
+            winner_group, placement_counts, stats = future.result()
 
-        for key, value in placement_counts.items():
-            placement_totals[key] += value
+            new_wins += winner_group
 
-        total_moves += int(stats["moves"])
-        total_sims += int(stats["total_sims"])
+            for key, value in placement_counts.items():
+                placement_totals[key] += value
+
+            total_moves += int(stats["moves"])
+            total_sims += int(stats["total_sims"])
 
     win_rate = new_wins / EVAL_GAMES
 
@@ -519,6 +716,25 @@ def checkpoint_metadata(
     return metadata
 
 
+def save_mlp_checkpoint(
+    model: PolicyNetwork,
+    encoder: ObservationEncoder,
+    action_mapper: ActionMapper,
+    path: str | Path,
+    model_cfg: Dict[str, Any],
+    metadata: Dict[str, Any],
+) -> None:
+    save_model_checkpoint(
+        model=model,
+        encoder=encoder,
+        action_mapper=action_mapper,
+        path=path,
+        hidden_dim=int(model_cfg["hidden_dim"]),
+        dropout=float(model_cfg["dropout"]),
+        extra_metadata=metadata,
+    )
+
+
 # =====================
 # MAIN
 # =====================
@@ -544,11 +760,9 @@ def main() -> None:
     save_json(output_dir / "initial_checkpoint_info.json", checkpoint_info)
 
     model_cfg = checkpoint_info["model_config"]
-    hidden_dim = int(model_cfg["hidden_dim"])
-    dropout = float(model_cfg["dropout"])
 
     best_model = copy.deepcopy(model)
-    best_model.to(DEVICE)
+    best_model.to(TRAIN_DEVICE)
     best_model.eval()
 
     optimizer = torch.optim.AdamW(
@@ -560,22 +774,20 @@ def main() -> None:
     replay_buffer: deque[SelfPlaySample] = deque(maxlen=BUFFER_SIZE)
     history: List[Dict[str, Any]] = []
 
-    save_model_checkpoint(
+    save_mlp_checkpoint(
         model=best_model,
         encoder=encoder,
         action_mapper=action_mapper,
         path=output_dir / "initial.pt",
-        hidden_dim=hidden_dim,
-        dropout=dropout,
-        extra_metadata={
+        model_cfg=model_cfg,
+        metadata={
             **script_config(),
             "source_checkpoint": INITIAL_CHECKPOINT,
-            "description": "Initial supervised checkpoint before self-play.",
+            "description": "Initial supervised MLP checkpoint before self-play.",
         },
     )
 
     accepted_iterations: List[int] = []
-
     overall_start = time.perf_counter()
 
     for iteration in range(ITERATIONS):
@@ -583,29 +795,13 @@ def main() -> None:
 
         print(f"\n=== ITERATION {iteration} ===")
 
-        # ---------------------
-        # Self-play collection
-        # ---------------------
         collect_start = time.perf_counter()
 
-        collected_samples: List[SelfPlaySample] = []
-        self_play_total_moves = 0
-        self_play_total_sims = 0
-
-        for game_idx in tqdm(
-            range(SELF_PLAY_GAMES_PER_ITER),
-            desc="Self-play",
-        ):
-            samples, stats = run_self_play_game(
-                model=model,
-                encoder=encoder,
-                action_mapper=action_mapper,
-                seed=BASE_SEED + iteration * 1_000_000 + game_idx,
-            )
-
-            collected_samples.extend(samples)
-            self_play_total_moves += int(stats["moves"])
-            self_play_total_sims += int(stats["total_sims"])
+        collected_samples, self_play_stats = collect_self_play_parallel(
+            model=model,
+            checkpoint_info=checkpoint_info,
+            iteration=iteration,
+        )
 
         replay_buffer.extend(collected_samples)
 
@@ -614,9 +810,6 @@ def main() -> None:
         print(f"Collected samples: {len(collected_samples)}")
         print(f"Replay buffer size: {len(replay_buffer)}")
 
-        # ---------------------
-        # Train candidate
-        # ---------------------
         train_start = time.perf_counter()
 
         train_losses = train_one_iteration(
@@ -627,16 +820,12 @@ def main() -> None:
 
         train_time_s = time.perf_counter() - train_start
 
-        # ---------------------
-        # Evaluate candidate
-        # ---------------------
         eval_start = time.perf_counter()
 
-        eval_result = evaluate_new_vs_best(
+        eval_result = evaluate_new_vs_best_parallel(
             new_model=model,
             best_model=best_model,
-            encoder=encoder,
-            action_mapper=action_mapper,
+            checkpoint_info=checkpoint_info,
             iteration=iteration,
         )
 
@@ -650,14 +839,13 @@ def main() -> None:
 
         candidate_path = candidates_dir / f"iteration_{iteration:03d}.pt"
 
-        save_model_checkpoint(
+        save_mlp_checkpoint(
             model=model,
             encoder=encoder,
             action_mapper=action_mapper,
             path=candidate_path,
-            hidden_dim=hidden_dim,
-            dropout=dropout,
-            extra_metadata=checkpoint_metadata(
+            model_cfg=model_cfg,
+            metadata=checkpoint_metadata(
                 iteration=iteration,
                 accepted=accepted,
                 train_losses=train_losses,
@@ -666,13 +854,14 @@ def main() -> None:
                     "checkpoint_type": "candidate",
                     "replay_buffer_size": len(replay_buffer),
                     "collected_samples": len(collected_samples),
+                    "self_play_stats": self_play_stats,
                 },
             ),
         )
 
         if accepted:
             best_model = copy.deepcopy(model)
-            best_model.to(DEVICE)
+            best_model.to(TRAIN_DEVICE)
             best_model.eval()
 
             accepted_iterations.append(iteration)
@@ -689,50 +878,46 @@ def main() -> None:
                     "checkpoint_type": "accepted_best",
                     "replay_buffer_size": len(replay_buffer),
                     "collected_samples": len(collected_samples),
+                    "self_play_stats": self_play_stats,
                 },
             )
 
-            save_model_checkpoint(
+            save_mlp_checkpoint(
                 model=best_model,
                 encoder=encoder,
                 action_mapper=action_mapper,
                 path=best_path,
-                hidden_dim=hidden_dim,
-                dropout=dropout,
-                extra_metadata=metadata,
+                model_cfg=model_cfg,
+                metadata=metadata,
             )
 
-            save_model_checkpoint(
+            save_mlp_checkpoint(
                 model=best_model,
                 encoder=encoder,
                 action_mapper=action_mapper,
                 path=accepted_path,
-                hidden_dim=hidden_dim,
-                dropout=dropout,
-                extra_metadata=metadata,
+                model_cfg=model_cfg,
+                metadata=metadata,
             )
 
         else:
-            # Revert trainable model back to current best.
             model.load_state_dict(best_model.state_dict())
-            model.to(DEVICE)
+            model.to(TRAIN_DEVICE)
             model.eval()
 
-            # Reset optimizer after reverting weights.
             optimizer = torch.optim.AdamW(
                 model.parameters(),
                 lr=LEARNING_RATE,
                 weight_decay=WEIGHT_DECAY,
             )
 
-        save_model_checkpoint(
+        save_mlp_checkpoint(
             model=model,
             encoder=encoder,
             action_mapper=action_mapper,
             path=output_dir / "last.pt",
-            hidden_dim=hidden_dim,
-            dropout=dropout,
-            extra_metadata=checkpoint_metadata(
+            model_cfg=model_cfg,
+            metadata=checkpoint_metadata(
                 iteration=iteration,
                 accepted=accepted,
                 train_losses=train_losses,
@@ -741,6 +926,7 @@ def main() -> None:
                     "checkpoint_type": "last_current_model",
                     "replay_buffer_size": len(replay_buffer),
                     "collected_samples": len(collected_samples),
+                    "self_play_stats": self_play_stats,
                 },
             ),
         )
@@ -755,14 +941,7 @@ def main() -> None:
             "collected_samples": len(collected_samples),
             "buffer_size": len(replay_buffer),
             "train_losses": train_losses,
-            "self_play_games": SELF_PLAY_GAMES_PER_ITER,
-            "self_play_total_moves": self_play_total_moves,
-            "self_play_total_sims": self_play_total_sims,
-            "self_play_avg_sims_per_move": (
-                self_play_total_sims / self_play_total_moves
-                if self_play_total_moves > 0
-                else 0.0
-            ),
+            "self_play_stats": self_play_stats,
             "collect_time_s": collect_time_s,
             "train_time_s": train_time_s,
             "eval_time_s": eval_time_s,
