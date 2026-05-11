@@ -1,0 +1,44 @@
+{
+  "model_config": {
+    "static_dim": 30,
+    "token_dim": 13,
+    "num_actions": 121,
+    "hidden_dim": 256,
+    "max_bids": 10,
+    "d_model": 64,
+    "nhead": 4,
+    "num_layers": 2,
+    "dim_feedforward": 128,
+    "dropout": 0.1
+  },
+  "encoder_config": {
+    "num_players": 4,
+    "max_dice_per_player": 5,
+    "max_total_dice": 20,
+    "max_bids": 10
+  },
+  "action_mapper_config": {
+    "max_total_dice": 20
+  },
+  "checkpoint_metadata": {
+    "data_path": "artifacts/data/trans/supervised_samples.jsonl",
+    "batch_size": 256,
+    "epochs": 30,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "val_fraction": 0.1,
+    "seed": 12345,
+    "num_players": 4,
+    "dice_per_player": 5,
+    "max_bids": 10,
+    "hidden_dim": 256,
+    "d_model": 64,
+    "nhead": 4,
+    "num_layers": 2,
+    "dim_feedforward": 128,
+    "dropout": 0.1,
+    "best_epoch": 27,
+    "best_score": 1.3971634725431814,
+    "selection_metric": "val_loss"
+  }
+}

@@ -33,5 +33,4 @@ ENV/
 Thumbs.db
 
 artifacts/data
-artifacts/self_play
 old_files/

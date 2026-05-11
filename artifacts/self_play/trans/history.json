@@ -1,0 +1,417 @@
+[
+  {
+    "iteration": 0,
+    "accepted": true,
+    "accepted_iterations_so_far": [
+      0
+    ],
+    "new_win_rate_vs_best": 0.56,
+    "collected_samples": 9543,
+    "buffer_size": 9543,
+    "train_losses": [
+      1.1204225023587544,
+      1.073711289299859,
+      1.066252244843377
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 9543,
+      "total_moves": 9543,
+      "total_sims": 4771500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 1185.3938159999961,
+    "train_time_s": 3.819450400005735,
+    "eval_time_s": 924.9401818000042,
+    "iteration_time_s": 2114.170839600003,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_000.pt",
+    "new_win_rate": 0.56,
+    "eval_games": 100.0,
+    "eval_total_moves": 8425.0,
+    "eval_total_sims": 4212500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 56.0,
+    "new_second": 52.0,
+    "new_third": 35.0,
+    "new_fourth": 57.0,
+    "best_first": 44.0,
+    "best_second": 48.0,
+    "best_third": 65.0,
+    "best_fourth": 43.0
+  },
+  {
+    "iteration": 1,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0
+    ],
+    "new_win_rate_vs_best": 0.49,
+    "collected_samples": 8741,
+    "buffer_size": 18284,
+    "train_losses": [
+      0.9594190614564079,
+      0.949996725150517,
+      0.9528248514447893
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8741,
+      "total_moves": 8741,
+      "total_sims": 4370500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 937.7900480000026,
+    "train_time_s": 6.927145100002235,
+    "eval_time_s": 799.0609669999976,
+    "iteration_time_s": 1743.7885473999995,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_001.pt",
+    "new_win_rate": 0.49,
+    "eval_games": 100.0,
+    "eval_total_moves": 7971.0,
+    "eval_total_sims": 3985500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 49.0,
+    "new_second": 53.0,
+    "new_third": 52.0,
+    "new_fourth": 46.0,
+    "best_first": 51.0,
+    "best_second": 47.0,
+    "best_third": 48.0,
+    "best_fourth": 54.0
+  },
+  {
+    "iteration": 2,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0
+    ],
+    "new_win_rate_vs_best": 0.49,
+    "collected_samples": 8562,
+    "buffer_size": 26846,
+    "train_losses": [
+      0.9262057382326859,
+      0.9220939943423638,
+      0.910157064978893
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8562,
+      "total_moves": 8562,
+      "total_sims": 4281000,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 919.1518161999993,
+    "train_time_s": 10.044688400004816,
+    "eval_time_s": 776.4345853999985,
+    "iteration_time_s": 1705.6435109000013,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_002.pt",
+    "new_win_rate": 0.49,
+    "eval_games": 100.0,
+    "eval_total_moves": 7868.0,
+    "eval_total_sims": 3934000.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 49.0,
+    "new_second": 49.0,
+    "new_third": 45.0,
+    "new_fourth": 57.0,
+    "best_first": 51.0,
+    "best_second": 51.0,
+    "best_third": 55.0,
+    "best_fourth": 43.0
+  },
+  {
+    "iteration": 3,
+    "accepted": true,
+    "accepted_iterations_so_far": [
+      0,
+      3
+    ],
+    "new_win_rate_vs_best": 0.57,
+    "collected_samples": 8660,
+    "buffer_size": 35506,
+    "train_losses": [
+      0.9109135062798209,
+      0.8865688935570095,
+      0.8785227200259333
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8660,
+      "total_moves": 8660,
+      "total_sims": 4330000,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 940.3963090999969,
+    "train_time_s": 13.556355000000622,
+    "eval_time_s": 783.1897338999988,
+    "iteration_time_s": 1737.1584271000029,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_003.pt",
+    "new_win_rate": 0.57,
+    "eval_games": 100.0,
+    "eval_total_moves": 7950.0,
+    "eval_total_sims": 3975000.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 57.0,
+    "new_second": 55.0,
+    "new_third": 44.0,
+    "new_fourth": 44.0,
+    "best_first": 43.0,
+    "best_second": 45.0,
+    "best_third": 56.0,
+    "best_fourth": 56.0
+  },
+  {
+    "iteration": 4,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0,
+      3
+    ],
+    "new_win_rate_vs_best": 0.48,
+    "collected_samples": 8253,
+    "buffer_size": 43759,
+    "train_losses": [
+      0.8543299015830544,
+      0.8534104796016917,
+      0.8471089769812191
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8253,
+      "total_moves": 8253,
+      "total_sims": 4126500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 844.1121984000056,
+    "train_time_s": 16.539549900000566,
+    "eval_time_s": 737.1368636999978,
+    "iteration_time_s": 1597.7991496999966,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_004.pt",
+    "new_win_rate": 0.48,
+    "eval_games": 100.0,
+    "eval_total_moves": 7609.0,
+    "eval_total_sims": 3804500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 48.0,
+    "new_second": 47.0,
+    "new_third": 50.0,
+    "new_fourth": 55.0,
+    "best_first": 52.0,
+    "best_second": 53.0,
+    "best_third": 50.0,
+    "best_fourth": 45.0
+  },
+  {
+    "iteration": 5,
+    "accepted": true,
+    "accepted_iterations_so_far": [
+      0,
+      3,
+      5
+    ],
+    "new_win_rate_vs_best": 0.55,
+    "collected_samples": 8217,
+    "buffer_size": 51976,
+    "train_losses": [
+      0.8364806753574031,
+      0.8280243342465693,
+      0.82893039861528
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8217,
+      "total_moves": 8217,
+      "total_sims": 4108500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 838.5954305999985,
+    "train_time_s": 19.590997200000857,
+    "eval_time_s": 725.9530778999979,
+    "iteration_time_s": 1584.1548053000006,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_005.pt",
+    "new_win_rate": 0.55,
+    "eval_games": 100.0,
+    "eval_total_moves": 7610.0,
+    "eval_total_sims": 3805000.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 55.0,
+    "new_second": 48.0,
+    "new_third": 49.0,
+    "new_fourth": 48.0,
+    "best_first": 45.0,
+    "best_second": 52.0,
+    "best_third": 51.0,
+    "best_fourth": 52.0
+  },
+  {
+    "iteration": 6,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0,
+      3,
+      5
+    ],
+    "new_win_rate_vs_best": 0.51,
+    "collected_samples": 8093,
+    "buffer_size": 60069,
+    "train_losses": [
+      0.808832741700686,
+      0.8077552517255148,
+      0.7964525029190586
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8093,
+      "total_moves": 8093,
+      "total_sims": 4046500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 808.6836334999971,
+    "train_time_s": 22.97115379999741,
+    "eval_time_s": 730.5788901000051,
+    "iteration_time_s": 1562.2439191999947,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_006.pt",
+    "new_win_rate": 0.51,
+    "eval_games": 100.0,
+    "eval_total_moves": 7445.0,
+    "eval_total_sims": 3722500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 51.0,
+    "new_second": 50.0,
+    "new_third": 57.0,
+    "new_fourth": 42.0,
+    "best_first": 49.0,
+    "best_second": 50.0,
+    "best_third": 43.0,
+    "best_fourth": 58.0
+  },
+  {
+    "iteration": 7,
+    "accepted": true,
+    "accepted_iterations_so_far": [
+      0,
+      3,
+      5,
+      7
+    ],
+    "new_win_rate_vs_best": 0.59,
+    "collected_samples": 8064,
+    "buffer_size": 68133,
+    "train_losses": [
+      0.7923967318427294,
+      0.7939351456505912,
+      0.7920580143319037
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8064,
+      "total_moves": 8064,
+      "total_sims": 4032000,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 806.391232300004,
+    "train_time_s": 26.002929199996288,
+    "eval_time_s": 697.2958946999934,
+    "iteration_time_s": 1529.7055265000017,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_007.pt",
+    "new_win_rate": 0.59,
+    "eval_games": 100.0,
+    "eval_total_moves": 7426.0,
+    "eval_total_sims": 3713000.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 59.0,
+    "new_second": 49.0,
+    "new_third": 51.0,
+    "new_fourth": 41.0,
+    "best_first": 41.0,
+    "best_second": 51.0,
+    "best_third": 49.0,
+    "best_fourth": 59.0
+  },
+  {
+    "iteration": 8,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0,
+      3,
+      5,
+      7
+    ],
+    "new_win_rate_vs_best": 0.5,
+    "collected_samples": 7947,
+    "buffer_size": 76080,
+    "train_losses": [
+      0.7755571531282889,
+      0.7739180004274523,
+      0.7706853296305682
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 7947,
+      "total_moves": 7947,
+      "total_sims": 3973500,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 794.4398249000005,
+    "train_time_s": 29.11792399999831,
+    "eval_time_s": 709.9924823000038,
+    "iteration_time_s": 1533.560102299998,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_008.pt",
+    "new_win_rate": 0.5,
+    "eval_games": 100.0,
+    "eval_total_moves": 7519.0,
+    "eval_total_sims": 3759500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 50.0,
+    "new_second": 50.0,
+    "new_third": 52.0,
+    "new_fourth": 48.0,
+    "best_first": 50.0,
+    "best_second": 50.0,
+    "best_third": 48.0,
+    "best_fourth": 52.0
+  },
+  {
+    "iteration": 9,
+    "accepted": false,
+    "accepted_iterations_so_far": [
+      0,
+      3,
+      5,
+      7
+    ],
+    "new_win_rate_vs_best": 0.48,
+    "collected_samples": 8062,
+    "buffer_size": 84142,
+    "train_losses": [
+      0.767372777185789,
+      0.7635335129935567,
+      0.7613629019115029
+    ],
+    "self_play_stats": {
+      "games": 100,
+      "samples": 8062,
+      "total_moves": 8062,
+      "total_sims": 4031000,
+      "avg_sims_per_move": 500.0
+    },
+    "collect_time_s": 811.5326034000027,
+    "train_time_s": 32.30449989999761,
+    "eval_time_s": 693.8033585000012,
+    "iteration_time_s": 1537.6555774000008,
+    "candidate_checkpoint": "artifacts\\self_play\\trans\\candidates\\iteration_009.pt",
+    "new_win_rate": 0.48,
+    "eval_games": 100.0,
+    "eval_total_moves": 7441.0,
+    "eval_total_sims": 3720500.0,
+    "eval_avg_sims_per_move": 500.0,
+    "new_first": 48.0,
+    "new_second": 65.0,
+    "new_third": 44.0,
+    "new_fourth": 43.0,
+    "best_first": 52.0,
+    "best_second": 35.0,
+    "best_third": 56.0,
+    "best_fourth": 57.0
+  }
+]

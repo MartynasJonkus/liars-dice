@@ -1,0 +1,23 @@
+{
+  "num_players": 4,
+  "dice_per_player": 5,
+  "max_total_dice": 20,
+  "initial_checkpoint": "artifacts/training/trans/best.pt",
+  "output_dir": "artifacts/self_play/trans",
+  "iterations": 10,
+  "self_play_games_per_iter": 100,
+  "eval_games": 100,
+  "workers": 11,
+  "sims_per_move_self_play": 500,
+  "sims_per_move_eval": 500,
+  "buffer_size": 100000,
+  "batch_size": 512,
+  "epochs_per_iter": 3,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "temperature": 1.0,
+  "accept_win_rate": 0.55,
+  "train_device": "cpu",
+  "worker_device": "cpu",
+  "base_seed": 12345
+}
