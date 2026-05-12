@@ -33,4 +33,5 @@ ENV/
 Thumbs.db
 
 artifacts/data
+evaluation/results
 old_files/
